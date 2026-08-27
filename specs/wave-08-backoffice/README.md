@@ -1,0 +1,171 @@
+# Wave 08 — Backoffice / Admin
+
+> Interface d'administration pour gérer les utilisateurs, annonces, signalements et feedbacks.
+
+> Retour au [spec principal](../README.md)
+
+---
+
+## 29. Backoffice
+
+### Accès
+
+- Route `/admin` (protégée, rôle admin requis)
+- Authentification renforcée (2FA obligatoire pour les admins)
+- Log de toutes les actions admin
+
+### Rôles
+
+| Rôle | Permissions |
+|---|---|
+| **User** | Accès standard |
+| **Modérateur** | Gérer signalements, modérer annonces |
+| **Admin** | Tout + gérer users + config |
+
+### Navigation
+
+```
+┌─────────────────────────────────────────────────────┐
+│  🛡️ Plot Admin                                      │
+├──────────┬──────────────────────────────────────────┤
+│          │                                          │
+│ 📊 Dash  │  Contenu principal                       │
+│ 👥 Users │                                          │
+│ 📋 Annonc│                                          │
+│ 🚩 Signa │                                          │
+│ 💬 Feedb │                                          │
+│ ⚙️ Config│                                          │
+│          │                                          │
+└──────────┴──────────────────────────────────────────┘
+```
+
+---
+
+## 30. Dashboard
+
+### Métriques
+
+| Métrique | Description |
+|---|---|
+| Utilisateurs | Total, actifs (7j/30j), nouveaux (sem.) |
+| Annonces | Total, actives, vendues/louées, supprimées |
+| Signalements | En attente, traités, taux de validation |
+| Feedbacks | Nouveaux, par type (bug/idée/question) |
+| Projets | Total, créés cette semaine |
+| Revenus | Si monétisation future |
+
+### Graphiques
+
+- Courbe utilisateurs (inscription/jour)
+- Courbe annonces (dépôt/jour)
+- Top 10 communes (annonces)
+- Répartition par type (terrain/maison/appt)
+
+---
+
+## 31. Gestion utilisateurs
+
+### Liste des users
+
+| Colonne | Description |
+|---|---|
+| Avatar | Photo |
+| Nom / Email | Identité |
+| Type | particulier / agence / notaire |
+| Score fiabilité | 0-100 |
+| Annonces | Nombre |
+| Inscrit le | Date |
+| Actions | Voir / Bloquer / Supprimer |
+
+### Fiche user
+
+| Section | Contenu |
+|---|---|
+| Profil | Infos complètes, type, SIRET |
+| Annonces | Liste des annonces avec statuts |
+| Signalements | Signalements reçus et envoyés |
+| Score fiabilité | Détail du calcul |
+| Activité | Historique (connexions, actions) |
+
+### Actions admin
+
+| Action | Description |
+|---|---|
+| **Bloquer** | Désactiver le compte (récupérable) |
+| **Supprimer** | Supprimer définitivement + données |
+| **Changer le rôle** | User ↔ Modérateur ↔ Admin |
+| **Reset score** | Remettre le score de fiabilité à 50 |
+| **Vérifier** | Marquer email comme vérifié manuellement |
+
+---
+
+## 32. Modération annonces
+
+### Liste des annonces à modérer
+
+| Filtre | Description |
+|---|---|
+| Statut | active / sous_offre / vendue / signalée |
+| Type | terrain / maison / appartement |
+| Source | manuelle / automatique / récupérée |
+| Date | Période |
+| Signalée | Oui / Non |
+
+### Actions de modération
+
+| Action | Description |
+|---|---|
+| **Approuver** | Valider l'annonce |
+| **Rejeter** | Refuser avec motif |
+| **Modifier** | Corriger les données |
+| **Suspendre** | Masquer temporairement |
+| **Supprimer** | Supprimer définitivement |
+
+---
+
+## 33. Gestion signalements
+
+### Liste des signalements
+
+| Colonne | Description |
+|---|---|
+| Annonce | Bien signalé |
+| Signalé par | Utilisateur (anonyme si déconnecté) |
+| Raison | dropdown (vendu, loué, faux, etc.) |
+| Date | Quand |
+| Statut | en_attente / traité / rejeté |
+| Actions | Traiter / Rejeter |
+
+### Actions
+
+| Action | Description |
+|---|---|
+| **Traiter** | Valide → archiver/supprimer l'annonce |
+| **Rejeter** | Non validé → garder l'annonce |
+| **Contacter** | Email au propriétaire de l'annonce |
+| **Bloquer** | Si signalements abusifs |
+
+---
+
+## 34. Gestion feedbacks
+
+### Liste des feedbacks
+
+| Colonne | Description |
+|---|---|
+| Type | 🐛 bug / 💡 idée / ❓ question / 😤 doléance |
+| Message | Contenu tronqué |
+| Page | Page courante |
+| Utilisateur | Si connecté |
+| Date | Quand |
+| Statut | ouvert / en_cours / résolu / fermé |
+| Actions | Répondre / Résoudre / Fermer |
+
+### Actions
+
+| Action | Description |
+|---|---|
+| **Répondre** | Email de réponse à l'utilisateur |
+| **Résoudre** | Marquer comme résolu |
+| **Fermer** | Fermer sans réponse |
+| **Convertir en issue** | Créer un ticket GitHub |
