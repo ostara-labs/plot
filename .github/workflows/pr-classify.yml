@@ -1,0 +1,82 @@
+name: Classify PR
+
+# Labels pull requests that touch trust-boundary files (see
+# .github/trust-boundary.yml) with "requires-human-review" and posts a
+# comment listing exactly what was touched. Informational only: the actual
+# merge gate is the "main-protection" ruleset, which requires code-owner
+# approval for those paths.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  classify:
+    name: classify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - name: Detect trust-boundary changes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          git fetch --quiet origin "$BASE_SHA"
+          changed="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")"
+          [ -n "$changed" ] || exit 0
+
+          # Idempotently ensure the label exists (fresh repos from this
+          # template do not have it yet).
+          gh label create requires-human-review \
+            --color E99695 --description "Touches trust-boundary files" \
+            --force >/dev/null 2>&1 || true
+
+          # Collect changed files matching a configured pattern.
+          hits=""
+          while IFS= read -r pattern; do
+            [ -n "$pattern" ] || continue
+            while IFS= read -r file; do
+              # Glob matching on the right-hand side is intentional: the
+              # patterns in trust-boundary.yml are shell globs.
+              # shellcheck disable=SC2053
+              if [[ "$file" == $pattern ]]; then
+                hits+="- \`$file\` (matched \`$pattern\`)"$'\n'
+              fi
+            done <<< "$changed"
+          done < <(sed -E 's/^[[:space:]]*-[[:space:]]*//' .github/trust-boundary.yml | grep -v '^[[:space:]]*$' | grep -v '^#')
+
+          has_label="$(gh pr view "$PR_NUMBER" --json labels --jq '[.labels[].name] | contains(["requires-human-review"])')"
+
+          if [ -n "$hits" ]; then
+            gh pr edit "$PR_NUMBER" --add-label requires-human-review >/dev/null 2>&1 || true
+            if [ "$has_label" != "true" ]; then
+              {
+                echo "## ⚠️ Trust boundary touched"
+                echo ""
+                echo "This PR modifies files protected by \`.github/trust-boundary.yml\`:"
+                echo ""
+                echo "$hits"
+                echo ""
+                echo "Human approval from a code owner (see CODEOWNERS) is **required** before merge."
+              } > body.md
+              gh pr comment "$PR_NUMBER" --body-file body.md >/dev/null
+              rm -f body.md
+            fi
+          else
+            # Not trust-boundary anymore (e.g. files reverted): clear the label.
+            if [ "$has_label" = "true" ]; then
+              gh pr edit "$PR_NUMBER" --remove-label requires-human-review >/dev/null 2>&1 || true
+            fi
+          fi
