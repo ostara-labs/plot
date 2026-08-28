@@ -176,14 +176,24 @@ Résumé :
 | API Carto Cadastre | Parcelles, limites, surfaces |
 | Geo-DVF | Transactions immobilières |
 | Statistiques DVF | Prix m² par commune |
-| API Carto GPU | Zones constructibles PLU |
+| API Carto GPU | Zones constructibles PLU + EBC |
 | IGN Altimétrie | Pente, exposition |
-| Géorisques | Risques naturels |
+| Géorisques V1/V2 | Risques naturels, nucléaire, SEVESO, ICPE, sols pollués, mines (par parcelle + rayon via V2) |
+| ODRÉ (RTE) / Enedis | Lignes haute tension, réseau élec |
+| Météo-France / DRIAS / Climadiag | Climat actuel (normales 1991-2020) + projections 2050/2100 |
+| GéoLittoral / BDIFF | Érosion côtière, historique feux de forêt |
+| Géoplateforme WFS | Servitudes (SUP), Natura 2000, ZNIEFF, sites classés, UNESCO, PEB |
+| data.culture.gouv.fr | Monuments historiques, SPR (périmètres ABF) |
+| ARCEP | Fibre (par adresse), couverture mobile |
+| SISPEA / EauFrance | Eau potable, assainissement (collectif/non collectif) |
+| INSEE BPE + FINESS + data.education | Commerces, santé, écoles |
+| Atmo Data / Geod'air | Qualité de l'air (indice ATMO par commune, concentrations) |
+| Cerema CBS | Cartes de bruit stratégiques (routes/rails) |
 | Hub'Eau | Eau souterraine |
 | ADEME | DPE (énergie) |
 | Carte des loyers | Loyers par commune |
 | REI DGFiP | Taxe foncière |
-| OSM / Overpass | POI, transport |
+| OSM / Overpass | POI, transport, bornes incendie |
 | IGN Géocodage | Adresses, itinéraires |
 
 ---

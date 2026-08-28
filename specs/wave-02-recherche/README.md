@@ -239,6 +239,39 @@ Les filtres affichés dépendent de la catégorie du projet. L'utilisateur peut 
 
 Les poids sont personnalisables par l'utilisateur.
 
+### 9.6 Critères transverses — risques technologiques, climat & environnement
+
+Ces critères s'appliquent à **toutes les catégories** (logement et investissement). Ils sont ajoutés aux grilles ci-dessus, avec leurs propres pondérations par défaut et toggles pour les désactiver.
+
+| Critère | Défaut | Source |
+|---|---|---|
+| Distance site nucléaire (INB) | > 10 km | Géorisques V2 `/installations_nucleaires` |
+| Distance site SEVESO (seuil haut) | > 1 km | Géorisques V2 `/installations_classees?statutSeveso=SEUIL_HAUT` |
+| Distance ICPE (hors SEVESO) | > 300 m | Géorisques V2 `/installations_classees` |
+| Sols pollués (SIS/BASOL/CASIAS) | Aucun dans 200 m | Géorisques V2 `/ssp` |
+| Anciennes mines / carrières souterraines | Aucune dans 200 m | Géorisques V2 `/cavites` |
+| Distance ligne haute tension (63-400 kV) | > 200 m | ODRÉ (RTE) lignes aériennes/souterraines |
+| Risque feux de forêt | Toggle (exclure les zones à risque) | Géorisques V1 `risques` (FEUFORET) + BDIFF |
+| Submersion marine / érosion côtière | Toggle (exclure zones PPRL + communes RTC) | Géorisques V1 `azi`/`ppr` + GéoLittoral |
+| Climat futur (canicule, sécheresse) | Jours très chauds / sols secs à 2050 max | Climadiag Commune / DRIAS-2020 |
+| Climat actuel (temp, ensoleillement) | Normales 1991-2020 | Météo-France |
+| Protection patrimoine (MH, sites, UNESCO, Natura 2000) | Badge info + avis ABF si périmètre MH | Géoplateforme WFS + data.culture.gouv.fr |
+| Zones humides / ZNIEFF | Badge info (contrainte procédurale) | Géoplateforme WFS |
+| Plan d'exposition au bruit (aérodrome) | Aucun logement en zone A/B | Géoplateforme WFS `dgac_peb_arrete_wfs` |
+| Bruit routes/rails | Classe Lden max (3 zones considérées acceptables) | Cerema CBS |
+| Qualité de l'air | Indice ATMO moyen max | Atmo Data |
+| Antennes relais | Comptage dans 300 m (info) | ANFR |
+| Fibre optique | Ou / Non / En cours de déploiement | ARCEP Ma connexion internet |
+| Eau potable au réseau | Oui/Non | SISPEA |
+| Assainissement collectif | Oui/Non (sinon SPANC/ANC) | SISPEA |
+| Couverture mobile 4G | Oui/Non | ARCEP Mon réseau mobile |
+
+**Règles de scoring transverses** :
+- Les critères de risque technologique (nucléaire, SEVESO) sont des **toggles d'exclusion** plus que des critères pondérés : en dessous des seuils, le bien est écarté (ou fortement pénalisé, configurable).
+- Les protections patrimoine/environnement sont des **badges info** dans la fiche bien (avec lien vers le service officiel) et n'affectent pas le score par défaut — sauf EBC / PEB A-B / sites classés qui sont des **exclusions dures** (non constructibles).
+- Les critères "confort" (fibre, bruit, air, antennes) sont pondérés dans le score avec des poids faibles par défaut.
+- Le **climat futur** est un critère de tri pertinent pour l'achat d'un logement qu'on gardera 20+ ans : intégré aux grilles avec poids modéré (3-5%) suivant la catégorie.
+
 ---
 
 ## 11. Favoris & sélections
