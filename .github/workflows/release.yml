@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  issues: write
 
 jobs:
   release-please:
@@ -19,7 +20,7 @@ jobs:
           # GITHUB_TOKEN cannot create pull requests when the org disables
           # "Allow GitHub Actions to create and approve pull requests".
           # Escape hatch: store a fine-grained PAT/App token (contents:write,
-          # pull-requests:write) as the RELEASE_TOKEN secret.
+          # pull-requests:write, issues:write) as the RELEASE_TOKEN secret.
           token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json

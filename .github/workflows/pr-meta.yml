@@ -50,8 +50,15 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.sha }}
+          IS_FORK: ${{ github.event.pull_request.head.repo.fork }}
         run: |
           set -euo pipefail
+          # Fork PRs get a read-only GITHUB_TOKEN: label writes below would
+          # fail with HTTP 403 under set -e.
+          if [ "$IS_FORK" = "true" ]; then
+            echo "Fork PR: GITHUB_TOKEN is read-only - skipping size labels."
+            exit 0
+          fi
           git fetch --quiet origin "$BASE_SHA"
 
           ensure_label() {
@@ -104,8 +111,15 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.sha }}
+          IS_FORK: ${{ github.event.pull_request.head.repo.fork }}
         run: |
           set -euo pipefail
+          # Fork PRs get a read-only GITHUB_TOKEN: label writes below would
+          # fail with HTTP 403 under set -e.
+          if [ "$IS_FORK" = "true" ]; then
+            echo "Fork PR: GITHUB_TOKEN is read-only - skipping risk labels."
+            exit 0
+          fi
           git fetch --quiet origin "$BASE_SHA"
           changed="$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")"
           [ -n "$changed" ] || exit 0

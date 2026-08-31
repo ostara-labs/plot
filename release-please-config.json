@@ -5,7 +5,8 @@
       "release-type": "node"
     },
     "python": {
-      "release-type": "python"
+      "release-type": "python",
+      "package-name": "plot-backend"
     }
   }
 }
