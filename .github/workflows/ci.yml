@@ -43,7 +43,7 @@ jobs:
   typescript:
     uses: ostara-labs/devtools/.github/workflows/typescript-ci.yml@d218bcdb16a8fbfe82a83051e8790e8b0efe0e36 # v1.0.0
   python:
-    uses: ostara-labs/devtools/.github/workflows/python-ci.yml@d218bcdb16a8fbfe82a83051e8790e8b0efe0e36 # v1.0.0
+    uses: ostara-labs/devtools/.github/workflows/python-ci.yml@4e6b4ee61ee51b86f16d5f2739ce6bb7ae89d3dc # v1.0.0
 
   # Secrets scanning on every PR and push (weekly full-history scan lives in
   # security.yml). Kept here so the single `gate` context covers everything.
