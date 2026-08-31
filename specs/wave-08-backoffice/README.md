@@ -22,6 +22,8 @@
 | **Modérateur** | Gérer signalements, modérer annonces |
 | **Admin** | Tout + gérer users + config |
 
+> Rôles stockés dans la colonne `users.role` — modèle wave-01 §13.
+
 ### Navigation
 
 ```
@@ -91,8 +93,8 @@
 
 | Action | Description |
 |---|---|
-| **Bloquer** | Désactiver le compte (récupérable) |
-| **Supprimer** | Supprimer définitivement + données |
+| **Bloquer** | Désactiver le compte (récupérable) — colonne `users.bloque` |
+| **Supprimer** | Suppression définitive admin (hard delete — distinct de la suppression propriétaire qui reste récupérable 30 j) + données |
 | **Changer le rôle** | User ↔ Modérateur ↔ Admin |
 | **Reset score** | Remettre le score de fiabilité à 50 |
 | **Vérifier** | Marquer email comme vérifié manuellement |
@@ -105,9 +107,9 @@
 
 | Filtre | Description |
 |---|---|
-| Statut | active / sous_offre / vendue / signalée |
+| Statut | active / sous_offre / vendu / signalée |
 | Type | terrain / maison / appartement |
-| Source | manuelle / automatique / récupérée |
+| Source | manuel / import / claim (enum canonique wave-01) |
 | Date | Période |
 | Signalée | Oui / Non |
 
@@ -119,7 +121,7 @@
 | **Rejeter** | Refuser avec motif |
 | **Modifier** | Corriger les données |
 | **Suspendre** | Masquer temporairement |
-| **Supprimer** | Supprimer définitivement |
+| **Supprimer** | Suppression définitive admin (hard delete — distinct de la suppression propriétaire, récupérable 30 j) |
 
 ---
 
@@ -131,7 +133,7 @@
 |---|---|
 | Annonce | Bien signalé |
 | Signalé par | Utilisateur (anonyme si déconnecté) |
-| Raison | dropdown (vendu, loué, faux, etc.) |
+| Raison | dropdown (vendu, sous_offre, faux, erreur_prix, autre) |
 | Date | Quand |
 | Statut | en_attente / traité / rejeté |
 | Actions | Traiter / Rejeter |
@@ -143,7 +145,7 @@
 | **Traiter** | Valide → archiver/supprimer l'annonce |
 | **Rejeter** | Non validé → garder l'annonce |
 | **Contacter** | Email au propriétaire de l'annonce |
-| **Bloquer** | Si signalements abusifs |
+| **Bloquer** | Si signalements abusifs (anti-abus signaleur : à spécifier dans wave-12 — 27.25) |
 
 ---
 
@@ -158,7 +160,7 @@
 | Page | Page courante |
 | Utilisateur | Si connecté |
 | Date | Quand |
-| Statut | ouvert / en_cours / résolu / fermé |
+| Statut | nouveau / en_cours / traite / archive (enum canonique wave-01) |
 | Actions | Répondre / Résoudre / Fermer |
 
 ### Actions

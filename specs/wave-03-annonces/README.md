@@ -37,7 +37,7 @@
 
 - Adresse (auto-géocodage)
 - Ou saisie parcelle cadastre (section + numéro)
-- Géométrie auto-récupérée depuis le cadastre
+- Géométrie récupérée depuis la table `terrains` (réplication cadastre locale — 27.9)
 
 #### Étape 3 : Caractéristiques (selon type)
 
@@ -82,6 +82,7 @@
 - Min 1 photo, max 30
 - Formats : JPG, PNG, WebP
 - Max 10 Mo par photo
+- Stockage : gestionnaire objet S3-compatible — la DB ne stocke que les URLs (27.2)
 
 #### Étape 5 : Prix & conditions
 
@@ -116,7 +117,7 @@ Un professionnel (agence, notaire, particulier) peut **récupérer une annonce e
 |---|---|---|
 | **Modifier** | Propriétaire de l'annonce | Modifier caractéristiques, prix, photos |
 | **Désactiver** | Propriétaire de l'annonce | Masquer temporairement (restorable) |
-| **Supprimer** | Propriétaire de l'annonce | Supprimer définitivement |
+| **Supprimer** | Propriétaire de l'annonce | Suppression logique, récupérable 30 jours (rétention RGPD — wave-01 §22) |
 | **Marquer vendu/loué** | Propriétaire de l'annonce | Changer le statut |
 | **Signaler** | Tout utilisateur (y compris déconnecté) | "Ce bien n'est plus disponible" |
 
@@ -133,7 +134,7 @@ Un professionnel (agence, notaire, particulier) peut **récupérer une annonce e
 | **Caractéristiques** | Surface, pièces, DPE, etc. (selon catégorie) |
 | **Score détaillé** | Barres par critère avec poids |
 | **Contexte** | PLU, risques, POI, transactions comparables |
-| **Photos** | Photo aérienne (IGN) |
+| **Photos** | Photo aérienne (tuiles IGN servies via cache/CDN — 27.9) |
 | **Annonce** | Si bien déposé sur Plot : fiche annonce avec contact propriétaire |
 | **Signaler** | Bouton "Ce bien n'est plus disponible" |
 
@@ -165,7 +166,7 @@ Un utilisateur connecté peut contacter le vendeur/propriétaire d'une annonce.
 |---|---|
 | Email masqué | L'email du contacteur est masqué (relais Plot) |
 | Pas de spam | Rate limiting : 5 messages/heure |
-| Historique | Le vendeur voit l'historique des contacts dans son dashboard |
+| Historique | Le vendeur voit l'historique des contacts dans son dashboard (wave-11 — Espace annonceur) |
 | Désinscription | Le vendeur peut bloquer un contacteur |
 
 #### Notification vendeur
@@ -174,7 +175,7 @@ Un utilisateur connecté peut contacter le vendeur/propriétaire d'une annonce.
 |---|---|
 | Nouveau message | Email + in-app |
 | Message lu | In-app |
-| Contacteur a signalé | Email (si le bien est signalé par le contacteur)
+| Contacteur a signalé | Email (si le bien est signalé par le contacteur) |
 
 ### Investissement
 

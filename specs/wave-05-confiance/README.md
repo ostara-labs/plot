@@ -14,7 +14,7 @@ Un utilisateur (y compris déconnecté) peut signaler une annonce comme :
 |---|---|
 | **Vendu** | Propriétaire notifié, annonce marquée "vendu" si confirmé |
 | **Sous offre** | Propriétaire notifié, badge "sous offre" |
-| **Faux / arnaque** | Vérification manuelle, mise en attente |
+| **Faux / arnaque** | Vérification manuelle, annonce passe en statut `signalée` (enum wave-01) |
 | **Erreur de prix** | Propriétaire notifié |
 | **Autre** | Message libre au propriétaire |
 
@@ -22,7 +22,8 @@ Un utilisateur (y compris déconnecté) peut signaler une annonce comme :
 
 | Statut | Comportement |
 |---|---|
-| **Déconnecté** | Le bien est masqué localement (localStorage). Si l'utilisateur se connecte, le signalement est synchronisé côté serveur. |
+| **En ligne (non logué)** | Signal envoyé directement au serveur (anonyme + device_fingerprint). Le bien est masqué localement. |
+| **Hors-ligne (PWA)** | Signal stocké en localStorage, synchronisé au retour en ligne via Background Sync API (27.12, wave-09). |
 | **Connecté** | Le bien est masqué dans ses résultats. Le signalement est enregistré côté serveur. |
 | **Annonceur** | Peut signaler ses propres annonces (changement de statut). |
 
@@ -58,7 +59,7 @@ Un **score de fiabilité** (0-100) est calculé pour chaque annonceur :
 | Réponse aux signalements (mise à jour) | +5 points |
 | Temps moyen de réponse aux messages | Impact positif |
 
-Le score de fiabilité est visible sur le profil du propriétaire (badge : "Propriétaire fiable" / "Nouveau" / "À vérifier").
+Le score de fiabilité est visible sur le profil du propriétaire (badge : "Propriétaire fiable" / "Nouveau" / "À vérifier") — détaillé dans l'espace annonceur (wave-11).
 
 Un score < 30 : les annonces de ce propriétaire sont affichées en dernier dans les résultats.
 Un score < 10 : les nouvelles annonces de ce propriétaire nécessitent une validation manuelle avant publication.
