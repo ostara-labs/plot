@@ -54,6 +54,12 @@ describe("score", () => {
     const notBuildable = score(TERRAINS[2], 300_000);
     expect(buildable.score).toBeGreaterThan(notBuildable.score);
   });
+
+  it("treats a zero-priced terrain as fully affordable", () => {
+    const free: Terrain = { ...TERRAINS[0], priceEur: 0 };
+    const unaffordable: Terrain = { ...TERRAINS[0], priceEur: 1_000_000 };
+    expect(score(free, 300_000).score).toBeGreaterThan(score(unaffordable, 300_000).score);
+  });
 });
 
 describe("rank", () => {
