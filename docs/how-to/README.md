@@ -35,7 +35,8 @@ lives in `../guidelines/` and `../architecture/`.
 ## Troubleshooting
 
 - **Pre-commit hook fails on files I did not touch** → hooks run repo-wide
-  gates (`make lint` / `make test`); fix or skip with `--no-verify` if
-  genuinely unrelated (visible in reflog — use sparingly)
+  gates (`make lint` / `make test`); investigate and fix the repo-wide
+  failure, or follow the approved exception process — never bypass hooks
+  with `--no-verify` (see AGENTS.md)
 - **pnpm version mismatch** → run pnpm from inside `typescript/`, not from
   the repo root (corepack resolves the pinned version per directory)

@@ -30,10 +30,10 @@ it is convoluted, it is wrong.
 Names carry meaning; functions do one thing; side effects are visible;
 errors are handled, never swallowed.
 
-**Here:** linters enforce the mechanical part (`clippy -D warnings`,
-`ruff check`, `credo --strict`, `biome check`) — treat their warnings as
-errors, never suppress them inline. The non-mechanical part (naming,
-decomposition) is review territory.
+**Here:** linters enforce the mechanical part (`biome check`,
+`ruff check`) — treat their warnings as errors, never suppress them
+inline. The non-mechanical part (naming, decomposition) is review
+territory.
 
 ## Clean Architecture
 

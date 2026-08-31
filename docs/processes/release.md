@@ -15,7 +15,7 @@ sequenceDiagram
     Note over H: review when ready to publish
     H->>M: squash-merge the Release PR
     M->>RP: push event triggers release.yml (Release PR merged)
-    RP->>GH: create tag v<version><br/>+ publish GitHub Release with generated notes
+    RP->>GH: create tag typescript-v<version> / python-v<version><br/>+ publish GitHub Release with generated notes
 ```
 
 ## TL;DR
@@ -32,6 +32,9 @@ automatically. No manual `git tag`, no hand-written changelog, ever.
 - **Tags are immutable** - a wrong release is fixed forward by cutting the
   next one, never by retagging.
 - **Only release-please creates tags/releases** on this repository.
+  Tags are component-prefixed per stack: `typescript-v<version>` and
+  `python-v<version>` (include-component-in-tag is on by default for
+  multi-package repos).
 - Commit types drive versions: `feat` bumps minor, `fix`/`perf` bump
   patch, `feat!` or a `BREAKING CHANGE:` footer bumps major; other types
   do not bump.

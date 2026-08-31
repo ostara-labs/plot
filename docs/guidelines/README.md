@@ -22,7 +22,7 @@ One rule, one authoritative location: this page only points.
 | Rule | Where |
 |---|---|
 | PRs required, status checks required, force-push blocked | `main-protection` ruleset (repo Settings → Rules → Rulesets; provisioned by [scripts/setup-rulesets.sh](../../scripts/setup-rulesets.sh)) |
-| Human approval for CI/dependency/release/governance files | [CODEOWNERS](../../.github/CODEOWNERS) + [trust-boundary.yml](../.github/trust-boundary.yml) |
+| Human approval for CI/dependency/release/governance files | [CODEOWNERS](../../.github/CODEOWNERS) + [trust-boundary.yml](../../.github/trust-boundary.yml) |
 | Conventional Commits (`type(scope)!: subject`) | enforced by commit-msg hook; see CONTRIBUTING.md |
 
 ## Security

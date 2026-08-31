@@ -43,7 +43,7 @@ Conventional Commits.
 
 ## Application architecture
 
-```
+```text
 ┌─────────────────────────────┐        ┌─────────────────────────────┐
 │  typescript/ (frontend)     │        │  python/ (backend)          │
 │  SvelteKit + Skeleton       │  HTTP  │  FastAPI                    │

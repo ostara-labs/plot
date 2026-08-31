@@ -18,9 +18,9 @@ agents. Without a record, decisions are lost, rediscovered, or re-litigated.
 
 We will use Architecture Decision Records (ADRs), as described by Michael
 Nygard in "Documenting Architecture Decisions". Each ADR is a short text file
-in docs/decisions/ named NNNN-title-with-dashes.md, following the template in
-docs/decisions/adr-template.md. ADRs are immutable once accepted; new
-decisions supersede old ones by reference.
+in docs/architecture/decisions/ named NNNN-title-with-dashes.md, following
+the template in docs/architecture/decisions/adr-template.md. ADRs are
+immutable once accepted; new decisions supersede old ones by reference.
 
 ## Consequences
 
