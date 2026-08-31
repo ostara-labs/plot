@@ -53,7 +53,7 @@ Plot fonctionne comme une application native sur mobile/tablette tout en restant
 | CSS / JS | Stale While Revalidate | Cache 30j |
 | Fonts | Cache First | Cache 1 an |
 | Images (non-carte) | Cache First | Cache 30j |
-| Tiles MapLibre | Cache First + Network | Cache 14j (quota 500Mo) |
+| Tiles MapLibre | Cache First + Network | Cache 1 j (max-age=86400 + revalidation — 27.14) (quota 500Mo) |
 | API calls | Network Only | — |
 | Données projet (offline) | Cache + Sync | Jusqu'à sync |
 
@@ -88,6 +88,8 @@ Install → Activate → Fetch (intercept)
 | Signaler une annonce | ✅ Sync différée |
 | Créer un projet | ⚠️ Stocké localement, sync à la reconnexion |
 
+> Signalement hors-ligne (aligné 27.12 : en ligne non logué = envoi direct serveur).
+
 ### Ce qui ne fonctionne PAS hors-ligne
 
 | Fonctionnalité | Raison |
@@ -106,7 +108,7 @@ Install → Activate → Fetch (intercept)
 | Projet créé | `sync_projets` | Moyenne |
 | Feedback | `sync_feedback` | Basse |
 
-Le service worker tente la sync à chaque retour en ligne. Si échec, réessaie avec backoff exponentiel.
+Le service worker tente la sync à chaque retour en ligne via la **Background Sync API**. Si échec, réessaie avec backoff exponentiel.
 
 ---
 
@@ -118,15 +120,15 @@ Les tiles MapLibre GL JS sont volumineuses. Stratégie de cache agressive :
 
 | Zone | TTL | Taille max |
 |---|---|---|
-| Zone viewport (viewport courant) | 14 jours | 200 Mo |
-| Zone projet (rayon de recherche) | 14 jours | 300 Mo |
+| Zone viewport (viewport courant) | 1 j (max-age=86400 + revalidation — 27.14) | 200 Mo |
+| Zone projet (rayon de recherche) | 1 j (max-age=86400 + revalidation — 27.14) | 300 Mo |
 | Tiles hors zone | Pas de cache | — |
 
 ### Nettoyage
 
 - Quota max : 500 Mo pour les tiles
 - LRU (Least Recently Used) pour libérer de l'espace
-- Nettoyage automatique des tiles > 14 jours
+- Nettoyage automatique des tiles > 1 jour
 
 ### Préchargement
 

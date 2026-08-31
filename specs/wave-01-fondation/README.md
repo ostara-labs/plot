@@ -21,13 +21,15 @@ Plot est un outil web qui aide les particuliers à trouver le meilleur logement 
 | Auth | FastAPI Users (open-source) |
 | Données géo | geopandas, shapely, pyproj |
 | Base de données | PostgreSQL + PostGIS |
-| Cache | Redis |
+| Tile server | Martin (vector tiles PostGIS → MapLibre) |
+| Cache / Rate limit | Redis |
+| Ingestion ETL | Airflow + dbt |
 | Emails | Postmark (transactionnel + digest) |
 | SMS | SMSemode / Sarbacane (OTP, alertes) |
 | Analytics | Plausible |
 | Monitoring | Sentry + Uptime Kuma |
 | i18n | Paraglide (SvelteKit) — FR/EN |
-| Déploiement | Docker Compose (dev) → AWS / Railway (prod) |
+| Déploiement | Docker Compose (dev) → Railway / ECS Fargate (prod) |
 
 ---
 
@@ -176,19 +178,33 @@ Résumé :
 | API Carto Cadastre | Parcelles, limites, surfaces |
 | Geo-DVF | Transactions immobilières |
 | Statistiques DVF | Prix m² par commune |
-| API Carto GPU | Zones constructibles PLU |
+| API Carto GPU | Zones constructibles PLU + EBC |
 | IGN Altimétrie | Pente, exposition |
-| Géorisques | Risques naturels |
+| Géorisques V1/V2 | Risques naturels, nucléaire, SEVESO, ICPE, sols pollués, mines (par parcelle + rayon via V2) |
+| ODRÉ (RTE) / Enedis | Lignes haute tension, réseau élec |
+| Météo-France / DRIAS / Climadiag | Climat actuel (normales 1991-2020) + projections 2050/2100 |
+| GéoLittoral / BDIFF | Érosion côtière, historique feux de forêt |
+| Géoplateforme WFS | Servitudes (SUP), Natura 2000, ZNIEFF, sites classés, UNESCO, PEB |
+| data.culture.gouv.fr | Monuments historiques, SPR (périmètres ABF) |
+| ARCEP | Fibre (par adresse), couverture mobile |
+| SISPEA / EauFrance | Eau potable, assainissement (collectif/non collectif) |
+| INSEE BPE + FINESS + data.education | Commerces, santé, écoles |
+| Atmo Data / Geod'air | Qualité de l'air (indice ATMO par commune, concentrations) |
+| Cerema CBS | Cartes de bruit stratégiques (routes/rails) |
 | Hub'Eau | Eau souterraine |
 | ADEME | DPE (énergie) |
 | Carte des loyers | Loyers par commune |
 | REI DGFiP | Taxe foncière |
-| OSM / Overpass | POI, transport |
+| OSM / Overpass | POI, transport, bornes incendie |
 | IGN Géocodage | Adresses, itinéraires |
 
 ---
 
 ## 13. Modèle de données
+
+> **Note PostGIS (27.3)** : chaque colonne `geometry` (EPSG:4326) possède une colonne compagnon `*_2154` (EPSG:2154) pour les calculs métriques (distances, surfaces). Les deux sont indexées GiST/B-tree. Non répétées dans les tables ci-dessous.
+>
+> **Note colonnes (27.2)** : toute donnée filtrable/triable/scorée est une colonne dédiée indexée. Les JSONB listés ici sont display-only ou paramétrage (jamais filtrés).
 
 ### Table `users`
 
@@ -200,6 +216,8 @@ Résumé :
 | prenom | TEXT | Prénom |
 | type | ENUM | particulier / agence / notaire |
 | siret | TEXT | SIRET (si pro) |
+| role | ENUM | user / moderateur / admin (défaut: user — backoffice wave-08) |
+| bloque | BOOLEAN | Compte désactivé par modération (récupérable) |
 | email_verifie | BOOLEAN | Email vérifié |
 | score_fiabilite | FLOAT | Score 0-100 (calculé automatiquement) |
 | locale | TEXT | Préférence langue (défaut: 'fr') |
@@ -211,19 +229,46 @@ Résumé :
 | Colonne | Type | Description |
 |---|---|---|
 | id | UUID | PK |
+| user_id | UUID | FK vers users — **NULL si projet local (déconnecté)**, renseigné à la sync (wave-09) |
 | nom | TEXT | Nom du projet |
 | type | ENUM | logement / investissement |
-| categorie | TEXT | terrain-terre / terrain-classique / maison / appartement |
-| criteres | JSONB | Critères de recherche (selon catégorie) |
+| categorie | ENUM | terrain-terre / terrain-classique / maison / appartement (l'option "Terrain" en investissement = terrain-terre ou terrain-classique) |
+| criteres | JSONB | Paramètres de recherche sauvegardés (config, pas filtré — voir 27.2) |
 | zone | GEOMETRY(POLYGON, 4326) | Zone de recherche dessinée |
 | zone_centre | GEOMETRY(POINT, 4326) | Centre si recherche par rayon |
 | zone_rayon_km | FLOAT | Rayon si recherche circulaire |
 | budget_max | FLOAT | Budget maximum |
-| derniers_resultats | JSONB | IDs des résultats sauvegardés |
+| derniers_resultats | JSONB | IDs des résultats sauvegardés (détection nouvelles offres) |
 | nouvelles_offres | INT | Nombre de nouvelles offres |
 | date_creation | TIMESTAMPTZ | |
 | date_derniere_consultation | TIMESTAMPTZ | |
 | date_mise_a_jour | TIMESTAMPTZ | |
+
+### Table `zones_priorite`
+
+Zones de priorité dessinées sur la carte investissement (wave-04). Plusieurs par projet.
+
+| Colonne | Type | Description |
+|---|---|---|
+| id | UUID | PK |
+| projet_id | UUID | FK vers projets |
+| niveau | ENUM | haute / moyenne / basse |
+| geometry | GEOMETRY(POLYGON, 4326) | Polygone de la zone (compagnon _2154) |
+| created_at | TIMESTAMPTZ | |
+
+### Table `profils_ponderation`
+
+Profils de pondération sauvegardés (wave-04). Par utilisateur, réutilisables sur plusieurs projets.
+
+| Colonne | Type | Description |
+|---|---|---|
+| id | UUID | PK |
+| user_id | UUID | FK vers users |
+| nom | TEXT | Nom du profil |
+| categorie | ENUM | terrain-terre / terrain-classique / maison / appartement |
+| poids | JSONB | {critere: poids} — somme = 100 (config, pas filtré — 27.2) |
+| created_at | TIMESTAMPTZ | |
+| updated_at | TIMESTAMPTZ | |
 
 ### Table `terrains`
 
@@ -237,6 +282,7 @@ Résumé :
 | zone | ENUM | urbain / periurbain / rural |
 | buildable | BOOLEAN | Constructible selon PLU |
 | estimated_price_eur | FLOAT | Prix estimé (DVF) |
+| taxe_fonciere_eur | FLOAT | Taxe foncière annuelle moyenne (REI DGFiP) |
 | slope_pct | FLOAT | Pente moyenne (%) |
 | exposure | TEXT | Exposition (N/NE/E/SE/S/SW/W/NW) |
 | metadata | JSONB | Données PLU, POI, etc. |
@@ -257,6 +303,7 @@ Résumé :
 | dpe | TEXT | Étiquette énergie (A-G) |
 | ges | TEXT | Étiquette GES (A-G) |
 | loyer_potentiel_eur | FLOAT | Loyer estimé/mois |
+| taxe_fonciere_eur | FLOAT | Taxe foncière annuelle (REI DGFiP) |
 | metadata | JSONB | DPE détaillé, POI, etc. |
 | created_at | TIMESTAMPTZ | |
 | updated_at | TIMESTAMPTZ | |
@@ -280,17 +327,19 @@ Résumé :
 | id | UUID | PK |
 | owner_id | UUID | FK vers users (propriétaire de l'annonce) |
 | type | ENUM | terrain / maison / appartement |
-| statut | ENUM | active / sous_offre / vendu / loué / désactivée / supprimée / signalée |
+| statut | ENUM | active / sous_offre / vendu / loué / archivée / désactivée / supprimée / signalée |
 | address | TEXT | Adresse complète |
 | commune | TEXT | Code INSEE + nom |
 | geometry | GEOMETRY(POLYGON ou POINT, 4326) | Géométrie (polygone si terrain, point si maison/appt) |
 | price_eur | FLOAT | Prix demandé |
 | surface_m2 | FLOAT | Surface |
-| photos | JSONB | [{url, ordre, principale}] |
-| caracteristiques | JSONB | Champs spécifiques au type (chambres, DPE, etc.) |
+| dpe | TEXT | Étiquette DPE (A-G) — colonne dédiée (27.2, filtrable) |
+| chambres | INT | Nombre de chambres (maison/appartement) — colonne dédiée (27.2) |
+| photos | JSONB | [{url, ordre, principale}] — URLs S3 uniquement, jamais de binaires (27.2) |
+| caracteristiques | JSONB | Champs spécifiques display-only (frais_agence, charges, disponibilite…) |
 | description | TEXT | Description libre |
 | source | ENUM | manuel / import / claim |
-| claim_status | ENUM | none / pending / verified / rejected |
+| claim_status | ENUM | none / pending / approved / rejected (aligné sur claims.status) |
 | date_depot | TIMESTAMPTZ | |
 | date_mise_a_jour | TIMESTAMPTZ | |
 | date_derniere_verification | TIMESTAMPTZ | |
@@ -306,7 +355,7 @@ Résumé :
 | device_fingerprint | TEXT | Hash du navigateur (pour déconnecté) |
 | type | ENUM | vendu / sous_offre / faux / erreur_prix / autre |
 | message | TEXT | Message libre (optionnel) |
-| traite | BOOLEAN | Traité ou non |
+| statut | ENUM | en_attente / traite / rejeté (modération wave-08) |
 | created_at | TIMESTAMPTZ | |
 
 ### Table `claims`
@@ -328,6 +377,8 @@ Résumé :
 | Colonne | Type | Description |
 |---|---|---|
 | id | UUID | PK |
+| user_id | UUID | FK vers users — NULL si déconnecté (27.26) |
+| token_suivi | TEXT | Token de suivi local (si non connecté — 27.26) |
 | type | ENUM | bug / idee / question / doléance |
 | message | TEXT | Contenu du feedback |
 | page | TEXT | Page où le feedback a été fait |
@@ -337,6 +388,63 @@ Résumé :
 | user_agent | TEXT | Navigateur / device |
 | created_at | TIMESTAMPTZ | |
 | updated_at | TIMESTAMPTZ | |
+
+### Table `contacts`
+
+Messages acheteur → vendeur (wave-03, contact vendeur). Rate limiting via Redis (27.8) : 5 messages/heure.
+
+| Colonne | Type | Description |
+|---|---|---|
+| id | UUID | PK |
+| annonce_id | UUID | FK vers annonces |
+| contacteur_id | UUID | FK vers users (connecté obligatoire) |
+| message | TEXT | Contenu du message |
+| lu | BOOLEAN | Lu par le vendeur |
+| created_at | TIMESTAMPTZ | |
+
+### Table `favoris`
+
+Biens/terrains favoris (wave-02). Cible polymorphe (terrain ou bien).
+
+| Colonne | Type | Description |
+|---|---|---|
+| id | UUID | PK |
+| user_id | UUID | FK vers users |
+| target_type | ENUM | terrain / bien (aligné sur scores.target_type) |
+| target_id | UUID | FK vers terrains ou biens |
+| projet_id | UUID | FK vers projets (nullable — favori hors projet) |
+| notes | TEXT | Notes personnelles (optionnel) |
+| created_at | TIMESTAMPTZ | |
+
+### Table `partages`
+
+Liens de partage par token (wave-02 : projet / comparatif / carte).
+
+| Colonne | Type | Description |
+|---|---|---|
+| id | UUID | PK |
+| token | TEXT | Token public (unique, indexé) |
+| type | ENUM | projet / compare / carte |
+| user_id | UUID | FK vers users (créateur) |
+| target_id | UUID | ID de l'objet partagé |
+| expires_at | TIMESTAMPTZ | Expiration (défaut 30j) |
+| revoked | BOOLEAN | Révoqué par le créateur |
+| created_at | TIMESTAMPTZ | |
+
+### Table `notifications`
+
+Notifications in-app (wave-07 — définition canonique déplacée ici).
+
+| Colonne | Type | Description |
+|---|---|---|
+| id | UUID | PK |
+| user_id | UUID | FK vers users |
+| type | ENUM | nouvelle_offre / mise_a_jour / annonce_statut / signalement / contact / compte / recap_hebdo |
+| titre | TEXT | Titre |
+| message | TEXT | Corps |
+| lien | TEXT | URL relative de destination |
+| lu | BOOLEAN | Lue |
+| created_at | TIMESTAMPTZ | |
 
 ---
 
@@ -356,21 +464,12 @@ backend/
 │   │   ├── layers.py        # Calques investissement
 │   │   ├── feedback.py      # Canal feedback utilisateurs
 │   │   ├── annonces.py      # CRUD annonces
-│   │   └── sources.py       # Proxy vers sources externes
+│   │   ├── contacts.py      # Contact vendeur (wave-03)
 │   ├── core/
 │   │   ├── scoring.py       # Moteur de scoring (par catégorie)
-│   │   ├── geocoding.py     # Géocodage / reverse geocodage
+│   │   ├── geocoding.py     # Géocodage / reverse geocodage (seul appel externe runtime — 27.9)
 │   │   ├── filters.py       # Filtrage par catégorie
 │   │   └── new_offers.py    # Détection nouvelles offres
-│   ├── data/
-│   │   ├── cadastre.py      # Client API cadastre
-│   │   ├── dvf.py           # Client DVF
-│   │   ├── plu.py           # Client PLU
-│   │   ├── poi.py           # Client OSM/Overpass
-│   │   ├── risks.py         # Client Géorisques
-│   │   ├── dpe.py           # Client ADEME DPE
-│   │   ├── loyers.py        # Client loyers
-│   │   └── altimetrie.py    # Client IGN altimétrie
 │   ├── db/
 │   │   ├── models.py        # SQLAlchemy + GeoAlchemy2
 │   │   └── session.py       # DB connection
@@ -384,6 +483,8 @@ backend/
 ├── Dockerfile
 └── docker-compose.yml
 ```
+
+> **Données open data (27.9/27.10)** : il n'y a PAS de clients runtime vers les APIs externes (cadastre, DVF, Géorisques, ADEME…). Toutes ces sources sont répliquées en local par les pipelines **Airflow + dbt** (ingestion/), qui remplissent les tables du modèle ci-dessus. Le seul appel externe runtime est le géocodage IGN (`core/geocoding.py`).
 
 ### Endpoints API
 
@@ -659,6 +760,10 @@ Plot est une application **mobile-first**. 60%+ du trafic immobilier vient du mo
 | Logs de connexion | 1 an |
 | Signalements | 2 ans |
 | Feedback | 2 ans |
+| Notifications | Supprimées après 90 jours (lues) ou 1 an (non lues) |
+| Favoris | Jusqu'à suppression par l'utilisateur |
+| Claims | 2 ans après résolution |
+| Messages (contacts) | 2 ans |
 | Cookies | 13 mois max |
 
 ### Mentions légales
@@ -780,3 +885,203 @@ Push → Lint → TypeCheck → Tests → Build → Deploy
 - [ ] Tests (Vitest)
 - [ ] Build (SvelteKit)
 - [ ] Review (1 minimum)
+
+---
+
+## 27. Décisions d'architecture
+
+> Décisions validées lors de la maturation Wave 01 (checklist 8 critères).
+
+### 27.1 Données : OpenData vs Annonces (Q1-Q2)
+
+**Pattern Hybrid** : les données open data (`terrains`, `biens`) et les annonces utilisateurs (`annonces`) sont dans des tables séparées. La couche API **fusionne à la lecture** : chaque terrain/bien peut avoir 0 ou 1 annonce associée.
+
+| État | Affichage |
+|---|---|
+| Terrain/bien sans annonce | Read-only (données open data) |
+| Terrain/bien avec annonce | Enrichi (prix vendeur, photos, description) |
+
+Pas de fusion en écriture. L'ETL remplit les tables open data. Les annonces sont créées par les utilisateurs. L'API joint les deux au moment de la requête.
+
+### 27.2 Données : JSONB vs colonnes dédiées (Q3) + photos
+
+**Principe directeur** : une donnée utilisée dans le WHERE (filtre), le ORDER BY (tri), ou le scoring (calcul de score) DOIT être une colonne dédiée indexée. Le JSONB est réservé aux données **display-only** (jamais filtrées, jamais triées, jamais scorées).
+
+| Donnée | Modèle |
+|---|---|
+| Surface, prix, pente, exposition, buildable, zone, DPE, loyer, taxe foncière | Colonne dédiée + index B-tree |
+| Géométrie (parcelle, zone, point) | Colonne GEO dédiée (PostGIS geometry) — jamais dans JSONB |
+| Extractions depuis JSONB source | Colonnes virtuelles `GENERATED ALWAYS AS ... STORED` |
+| Metadata enrichissement (POI, PLU raw) | JSONB (display-only) |
+| Full-text / texte libre | JSONB GIN index (uniquement si recherche libre) |
+
+Le scoring travaille sur des colonnes (matériau pré-calculé + index), cohérent avec la table `scores`.
+
+**Photos** : stockées dans un **gestionnaire de fichiers objet (S3-compatible)**, jamais en base. Le champ `photos` en base ne contient que des **références/URLs** vers l'objet — pas les binaires.
+
+### 27.3 PostGIS : système de coordonnées (Q4)
+
+**Double stockage** :
+- `geometry` en **EPSG:4326** (WGS84) pour MapLibre GL JS
+- `geometry_2154` en **EPSG:2154** (RGF93 Lambert-93) pour les calculs de distance et surface
+
+PostGIS gère les conversions via `ST_Transform()`. Les deux colonnes sont indexées.
+
+### 27.4 PostGIS : géométries invalides (Q5)
+
+**Auto-correction à l'import** : l'ETL applique `ST_MakeValid()` + log `ST_IsValidReason()` avant insertion. Les géométries invalides sont corrigées automatiquement. Les logs enregistrent les corrections pour suivi.
+
+### 27.5 PostGIS : recherche spatiale (Q6)
+
+**GiST index natif** sans clustering. Le GiST fait du bbox pre-filtering nativement. Architecture des requêtes :
+
+| Canal | Mécanisme |
+|---|---|
+| Carto web (MapLibre) | Tile server (Martin/pg_tileserv) → cache tuiles → PostGIS |
+| Recherche zone dessinée | FastAPI → GiST index → PostGIS |
+| Enrichissement annonce | FastAPI → GiST index → PostGIS |
+
+Le clustering sera évalué si les benchmarks montrent des lenteurs > 500ms.
+
+### 27.6 Auth : conflit email OAuth (Q7)
+
+**Erreur + lien manuel** : si un compte local existe déjà avec l'email OAuth, un message d'erreur indique à l'utilisateur de se connecter en local puis de lier son compte OAuth dans les settings. Pas de merge automatique (risque de sécurité).
+
+### 27.7 Auth : account enumeration (Q8)
+
+**Messages séparés + rate limiting strict** : les messages d'erreur distinguent "email inconnu" de "mauvais mot de passe", mais le rate limiting (Q9) rend l'enumeration impraticable en pratique.
+
+### 27.8 Auth : rate limiting (Q9)
+
+**Double limite IP + email** en Redis :
+
+| Clé Redis | TTL | Max | Scope |
+|---|---|---|---|
+| `rl:login:{email_hash}` | 15 min | 5 | Par email |
+| `rl:login:{ip}` | 15 min | 5 | Par IP |
+
+Les emails sont hashés dans les clés Redis (PII-safe).
+
+### 27.9 Sources : données locales vs API temps réel (Q10)
+
+**Réplication totale** : toutes les données open data sont répliquées en local via ETL (Airflow + dbt). Aucune API externe n'est requêtée en runtime, sauf :
+
+| API temps réel | Usage |
+|---|---|
+| IGN Géocodage | Résolution adresse → coordonnées |
+| IGN Reverse Géocodage | Clic carte → adresse |
+
+La fraîcheur devient un problème ETL (refresh daily/weekly), pas runtime.
+
+### 27.10 Pipeline d'ingestion (Q11)
+
+**Full platform : Airflow + dbt** pour l'orchestration des pipelines ETL. Chaque source a son propre pipeline avec :
+- Rate limiter spécifique (respect des contraintes provider)
+- Retry + backoff exponentiel
+- Logging + monitoring
+- Fréquence adaptée à la source (annuel, trimestriel, mensuel, hebdo)
+
+### 27.11 Données manquantes (Q12)
+
+**Scoring sur données disponibles** : le scoring ignore les critères sans données. L'UI affiche "Donnée non disponible" pour les champs manquants. Le score est indicatif, pas absolu.
+
+### 27.12 Signalement déconnecté (Q13)
+
+**Mode hybride** :
+- **En ligne** (non logué) : signal envoyé directement au serveur (anonyme + device_fingerprint)
+- **Hors-ligne** (PWA) : signal stocké en localStorage + sync au retour en ligne via Background Sync API
+
+### 27.13 Infra production (Q14)
+
+**Docker Compose dev + ECS/Railway prod** :
+
+| Environnement | Outil | Purpose |
+|---|---|---|
+| Dev | Docker Compose | Stack locale complète |
+| Prod | Railway ou ECS Fargate | Managed, auto-scaling |
+
+Stack prod : PostgreSQL+PostGIS, Redis, FastAPI, SvelteKit, Martin, Airflow, dbt, Plausible, Uptime Kuma.
+
+### 27.14 Cache Redis (Q15)
+
+**Architecture adoptée** : les tuiles vectorielles ne vont PAS dans Redis. Martin a un cache mémoire intégré (Moka LRU, 512 Mo) + benchmarks ~12,000 req/s @ z14 ; le bottleneck est le scoring/recherche polygon, pas les tuiles. Ajout d'un CDN avec purge + headers `Cache-Control` → le cache Martin suffit. Un cache Redis tuiles ne sert que si 2+ instances Martin (réviser plus tard).
+
+**Redis (4 Go, `allkeys-lru`) cache** :
+| Cache | Key | TTL | Invalidation |
+|---|---|---|---|
+| Scores par parcelle | `scores:v{N}:{parcel_id}` | 7j | Airflow INCR version |
+| Résultats recherche | `search:v{N}:h3:{cell}` | 1h | Tags (SMEMBERS+UNLINK) |
+| Rate limiting IP+email | `rl:ip:{ip}` / `rl:email:{email}` | 15 min (fenêtre) | Fenêtre glissante |
+
+- Normalisation par grille **H3** pour les résultats de recherche (stocker IDs+scores, géométrie servie par les tuiles)
+- cache-aside, `orjson` + compression `zlib`/`zstd`, **fail-open** sur erreur Redis (jamais 500 si Redis down)
+- Sizing 4 Go, hit rate monitoré (>30-60% = bug de normalization de clé)
+- **Géocodage non caché** (réponses uniques, hit rate ≈ 0)
+
+**Invalidation ETL** : Airflow/dbt post-ETL → `INCR cache:version:{dataset}` (scores, parcels, biens) + purge CDN. TTL comme safety net si le hook échoue. Tapotage via couches versionnées (O(1)) + tags (spatial) + TTL.
+
+**Tiles** : `Cache-Control: public, max-age=86400` (cache navigateur L1) + CDN purge sur ETL + Martin `cache.expiry` = cadence ETL.
+
+### 27.15 Alembic migrations (Q16)
+
+**Migrations incrémentales** : un fichier par changement, `alembic revision --autogenerate` détecte les changements SQLAlchemy. Standard FastAPI, history claire.
+
+### 27.16 RGPD effacement (Q17)
+
+**Suppression complète + anonymisation** : le compte utilisateur et toutes les données personnelles (annonces, signalements, feedback, scores liés) sont supprimés. Les données agrégées anonymisées restent (stats marché non rattachables à un user).
+
+### 27.17 Traductions manquantes (Q18)
+
+**Build error** : Paraglide détecte les clés manquantes en EN au build time. Le build échoue avec la liste des clés manquantes. Force la complétude des traductions avant déploiement.
+
+### 27.18 Validation UX pré-frontend
+
+**Règle** : avant de démarrer l'implémentation de chaque parcours utilisateur frontend, valider l'UX wireframe/prototype par parcours. Chaque parcours (recherche terrain, recherche maison, dépôt annonce, investissement, signalement, etc.) a un livrable UX validé avant le code.
+
+### 27.19 Personas futurs
+
+Deux personas supplémentaires à intégrer dans une future wave :
+- **Bailleur** (landlord) : gestion des bails, état des lieux, quittancement
+- **Locataire** (tenant) : recherche de location, état des lieux, droits
+
+### 27.20 Backup & disaster recovery (PRA)
+
+| Élément | Stratégie |
+|---|---|
+| PostgreSQL | Snapshot quotidien (managed provider) + WAL continu (PITR, RPO ≤ 15 min) |
+| Redis | Aucun backup (cache pur — reconstruit depuis PostGIS) |
+| Photos S3 | Réplication gérée par le provider (durabilité 11×9) |
+| Airflow/dbt | Rejouable : les pipelines reconstruisent les données depuis les sources |
+| Restore test | Mensuel : restauration sur environnement de staging |
+| RTO cible | ≤ 4 h (redéploiement + restore PITR) |
+
+### 27.21 Accessibilité
+
+- **Cible** : RGAA 4.1 niveau AA (= WCAG 2.1 AA)
+- **Priorités** : navigation clavier complète, contrastes AA, focus visible, formulaires labellisés, tailles de cible tactile ≥ 44px, résumé textuel des résultats carte (MapLibre)
+- **Tests** : axe-core en CI, audit manuel annuel
+- **Déclaration** : page `/fr/accessibilite` (déclaration RGAA obligatoire dès publication)
+
+### 27.22 Trigger "nouvelles offres" (Q1 — hybride)
+
+- **Annonces utilisateur** (dépôt/modification) : webhook interne → matching immédiat contre les projets actifs → notification. La fréquence "Instantané" de wave-07 ne s'applique qu'à ce canal.
+- **Données ETL** : matching exécuté au refresh ETL (batch). La détection vit dans `core/new_offers.py`, déclenchée par les deux canaux ; le compteur `projets.nouvelles_offres` et les notifications wave-07 partagent le même matching.
+
+### 27.23 Espace annonceur (Q2 — wave dédiée)
+
+**Dashboard complet** → **wave-11-espace-annonceur** : mes annonces, boîte de contacts (réponse inline), stats vues, score de fiabilité visible. Impact fiabilité du contact : **+1/mois si taux de réponse > 80 % sous 72 h** (donnée : table `contacts`, champ `lu` + réponses).
+
+### 27.24 Réconciliation signalements anonymes → compte (Q3 — rattachement auto)
+
+À la création de compte, le serveur **rattache automatiquement** au nouveau `user_id` les signalements et masquages associés au `device_fingerprint` (signalements anonymes serveur + files de sync locale). Le masquage suit ensuite le compte (multi-device). Deux mécanismes coexistant : Background Sync = transport device→serveur ; le rattachement = attribution compte, indépendant.
+
+### 27.25 Modération & anti-abus (Q4 — wave dédiée avec analyse préalable)
+
+**wave-12-moderation-antabuse**. Une **analyse préalable est obligatoire** avant toute spécification : volume attendu de signalements, seuils d'escalade vs charge de modération, définition du signalement abusif, score signaleur, RGPD des pénalités. La file de modération unifiée et l'anti-abus signaleur seront spécifiés à l'issue de l'analyse.
+
+### 27.26 Feedback : identité et suivi (Q5 — hybride)
+
+- **user_id** si connecté, sinon **token_suivi** local (comme les projets locaux)
+- Endpoint `GET /api/feedback/mine` : l'utilisateur suit le statut de ses feedbacks (statut + réponse)
+- Notification in-app à la réponse de l'équipe (type `compte` ou dédié — wave-07)
+- "Convertir en issue GitHub" : action **manuelle** de l'admin (pas d'intégration automatisée)
