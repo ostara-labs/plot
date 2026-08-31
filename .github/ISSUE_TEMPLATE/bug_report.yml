@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a bug in the template
+description: Report a bug in Plot
 body:
   - type: textarea
     id: description
@@ -40,9 +40,7 @@ body:
       description: Which stack(s) does this affect?
       multiple: true
       options:
-        - Rust
         - TypeScript
-        - Elixir
         - Python
         - CI/CD
         - Other

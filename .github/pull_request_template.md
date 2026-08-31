@@ -15,14 +15,15 @@
 ## Visual
 
 <!-- Encouraged whenever the change has structure or a UI surface.
-     Mermaid renders natively on GitHub:
+     Delete the example below when done. Mermaid renders natively on
+     GitHub; screenshots (before / after) for anything visible: -->
 
 ```mermaid
 flowchart LR
     A[Before] -->|this PR| B[After]
 ```
 
-Screenshots (before / after) for anything visible:
+<!-- Screenshots table for anything visible:
 
 | Before | After |
 |---|---|

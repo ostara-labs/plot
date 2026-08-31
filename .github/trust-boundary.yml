@@ -37,5 +37,9 @@ paths:
   - LICENSE
   - SECURITY.md
 
+  # Security scanning policy
+  - .gitleaks.toml
+  - .gitleaksignore
+
   # Ruleset provisioning script
   - scripts/setup-rulesets.sh

@@ -1,5 +1,5 @@
 name: Feature request
-description: Suggest a new feature for the template
+description: Suggest a new feature for Plot
 body:
   - type: textarea
     id: problem
