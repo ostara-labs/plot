@@ -37,9 +37,14 @@ def _object_schema(obj) -> str | None:
 
 
 def include_name(name, type_, parent_names) -> bool:
-    """Only compare the ``public`` schema (skip PostGIS tiger/topology)."""
+    """Only compare the default (``public``) schema — skip PostGIS tiger/topology.
+
+    ``None`` is the connection's default schema reported unqualified depending
+    on search_path settings; it must be accepted or autogenerate would drop
+    every application table.
+    """
     if type_ == "schema":
-        return name == "public"
+        return name in (None, "public")
     return True
 
 
@@ -67,6 +72,7 @@ def run_migrations_offline() -> None:
         include_name=include_name,
         include_object=include_object,
         render_item=render_item,
+        process_revision_directives=alembic_helpers.writer,
     )
 
     with context.begin_transaction():
@@ -81,6 +87,7 @@ def do_run_migrations(connection: Connection) -> None:
         include_name=include_name,
         include_object=include_object,
         render_item=render_item,
+        process_revision_directives=alembic_helpers.writer,
     )
 
     with context.begin_transaction():

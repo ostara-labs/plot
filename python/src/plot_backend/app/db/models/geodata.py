@@ -7,6 +7,7 @@ from geoalchemy2 import Geometry
 from geoalchemy2.elements import WKBElement
 from sqlalchemy import Boolean, DateTime, Float, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import Mapped, mapped_column
 
 from plot_backend.app.db.base import Base
@@ -42,8 +43,9 @@ class Terrain(Base):
     slope_pct: Mapped[float | None] = mapped_column(Float, index=True)
     exposure: Mapped[str | None] = mapped_column(Text, index=True)
     # DB column name is ``metadata`` (spec); ``metadata_json`` avoids the
-    # reserved ``metadata`` attribute on the Declarative API.
-    metadata_json: Mapped[dict | None] = mapped_column("metadata", JSONB)
+    # reserved ``metadata`` attribute on the Declarative API. MutableDict
+    # tracks in-place dict mutations (ETL enrichment) so they persist.
+    metadata_json: Mapped[dict | None] = mapped_column("metadata", MutableDict.as_mutable(JSONB))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
@@ -71,7 +73,7 @@ class Bien(Base):
     ges: Mapped[str | None] = mapped_column(Text, index=True)
     loyer_potentiel_eur: Mapped[float | None] = mapped_column(Float, index=True)
     taxe_fonciere_eur: Mapped[float | None] = mapped_column(Float, index=True)
-    metadata_json: Mapped[dict | None] = mapped_column("metadata", JSONB)
+    metadata_json: Mapped[dict | None] = mapped_column("metadata", MutableDict.as_mutable(JSONB))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
@@ -88,7 +90,7 @@ class Score(Base):
     target_id: Mapped[UUID] = mapped_column(index=True)
     category: Mapped[str] = mapped_column(Text, index=True)
     score: Mapped[float] = mapped_column(Float, index=True)
-    breakdown: Mapped[dict | None] = mapped_column(JSONB)
+    breakdown: Mapped[dict | None] = mapped_column(MutableDict.as_mutable(JSONB))
     computed_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
