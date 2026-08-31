@@ -16,6 +16,7 @@ updating its row here in the same PR.
 | .gitattributes | Line endings, linguist hints |
 | .gitignore | Root ignores (stack ignores live in stack dirs) |
 | .env.example | Environment template |
+| docker-compose.dev.yml | Local dev stack: PostGIS 17-3.5 + Redis 7 (Martin later) |
 | .gitleaks.toml | Secret scanning config |
 | README.md | Pitch and quickstart |
 | MANIFEST.md | This file |
@@ -65,6 +66,10 @@ updating its row here in the same PR.
 |---|---|
 | python/ | Package `plot-backend` / `plot_backend`; marker pyproject.toml |
 | python/.gitignore | Stack ignores |
+| python/src/plot_backend/app/ | FastAPI app: main.py (create_app, /health, /health/db), config.py (Settings, PLOT_ env prefix) |
+| python/src/plot_backend/app/db/ | SQLAlchemy async engine/session (session.py), declarative Base (base.py) |
+| python/src/plot_backend/app/db/models/ | 15 SQLAlchemy models (spec wave-01 §13) split by domain: identity, projets, geodata, annonces, engagement + shared enums |
+| python/alembic/ | Alembic migrations (async env wired to PLOT_DATABASE_URL; initial schema e4f7812cece6) |
 
 ### Specification tree
 

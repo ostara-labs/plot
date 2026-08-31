@@ -1,0 +1,31 @@
+"""Application settings, loaded from environment variables (prefix PLOT_)."""
+
+from functools import lru_cache
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    """Runtime configuration for the Plot backend.
+
+    Values come from environment variables prefixed with ``PLOT_`` (e.g.
+    ``PLOT_DATABASE_URL``) or from a ``.env`` file at the repo root.
+    """
+
+    model_config = SettingsConfigDict(
+        env_prefix="PLOT_",
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+    database_url: str = "postgresql+asyncpg://plot:plot@localhost:5432/plot"
+    secret_key: str = "dev-secret-key-change-me"
+    access_token_expire_minutes: int = 15
+    refresh_token_expire_days: int = 7
+
+
+@lru_cache
+def get_settings() -> Settings:
+    """Return the cached application settings instance."""
+    return Settings()

@@ -60,6 +60,13 @@ Conventional Commits.
 External data sources (cadastre, DVF, Géorisques, IGN, ADEME, Hub'Eau…)
 are consumed server-side by the backend; see docs/SOURCES.md.
 
+The backend app lives in `python/src/plot_backend/app/` (FastAPI entrypoint
+`main.py`, settings `config.py`, async DB layer `db/` with the 15 SQLAlchemy
+models from spec wave-01 §13 split by domain under `db/models/`). Schema
+migrations live in `python/alembic/` and are driven by `PLOT_DATABASE_URL`.
+Local infrastructure (PostGIS + Redis) is provided by
+`docker-compose.dev.yml` at the repo root.
+
 ## Where things live
 
 | Concern | Location |

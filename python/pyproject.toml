@@ -3,9 +3,23 @@ name = "plot-backend"
 version = "0.2.0"
 description = "Plot backend - geospatial search and scoring for the Plot platform."
 requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.19.1",
+    "asyncpg>=0.31.0",
+    "fastapi>=0.141.1",
+    "geoalchemy2>=0.20.0",
+    "greenlet>=3.5.5",
+    "pydantic-settings>=2.15.0",
+    "sqlalchemy[asyncio]>=2.0.52",
+    "uvicorn[standard]>=0.52.4",
+]
 
 [dependency-groups]
-dev = ["pytest>=9.1.1", "ruff>=0.16.3"]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.1.1",
+    "ruff>=0.16.3",
+]
 
 [tool.ruff]
 line-length = 100
