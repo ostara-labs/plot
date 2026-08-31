@@ -76,8 +76,8 @@ Selon le type choisi :
 **Logement principal :**
 | Catégorie | Description |
 |---|---|
-| Terrain maison enterrée | Terrain pour construction enterrée/semi-enterrée |
-| Terrain construction classique | Terrain pour maison traditionnelle |
+| Terrain pour maison enterrée (`terrain-terre`) | Terrain pour construction enterrée/semi-enterrée |
+| Terrain construction classique (`terrain-classique`) | Terrain pour maison traditionnelle |
 | Maison | Maison existante |
 | Appartement | Appartement existant |
 
@@ -86,7 +86,7 @@ Selon le type choisi :
 |---|---|
 | Maison | Maison en location |
 | Appartement | Appartement en location |
-| Terrain | Terrain à construire puis louer |
+| Terrain (`terrain-terre` ou `terrain-classique`) | Terrain à construire puis louer |
 
 #### Étape 3 : Zone géographique
 
@@ -104,7 +104,7 @@ Chaque catégorie a ses propres critères avec sliders et toggle :
 | Pente max | Slider 0-45% | 15% |
 | Exposition | Toggle (S, SW, W, SE, E, NE, N, NW) | S, SW, SE |
 | Surface min | Slider 200-5000 m² | 500 m² |
-| Zone | Toggle (urbain, périurbain, rural) | périurbain |
+| Zone | Toggle (urbain, periurbain*, rural) — *affiché "périurbain" en UI, valeur enum sans accent | périurbain |
 | Constructible | Toggle | Oui |
 | Distance ville max | Slider 5-100 km | 30 km |
 
@@ -182,7 +182,10 @@ Les filtres affichés dépendent de la catégorie du projet. L'utilisateur peut 
 
 ## 10. Critères d'évaluation par catégorie
 
-### 9.1 Terrain maison enterrée
+> **Sources (27.9/27.10)** : toutes les sources listées ci-dessous sont répliquées en local via les pipelines ETL (Airflow + dbt — cf. wave-01 27.9). Aucun appel API externe au runtime.
+> **Scoring (27.2/27.11)** : les critères s'appuient sur des colonnes dédiées indexées (cf. modèle wave-01 §13) et la table `scores` pré-calculée. Le scoring est partiel sur données manquantes : critère ignoré + badge "Donnée non disponible".
+
+### 10.1 Terrain maison enterrée
 
 | Critère | Poids | Source |
 |---|---|---|
@@ -193,7 +196,7 @@ Les filtres affichés dépendent de la catégorie du projet. L'utilisateur peut 
 | Constructibilité | 10% | PLU / GPU |
 | Risques naturels | 10% | Géorisques |
 
-### 9.2 Terrain construction classique
+### 10.2 Terrain construction classique
 
 | Critère | Poids | Source |
 |---|---|---|
@@ -204,7 +207,7 @@ Les filtres affichés dépendent de la catégorie du projet. L'utilisateur peut 
 | Proximité POI | 10% | OSM |
 | Risques naturels | 5% | Géorisques |
 
-### 9.3 Maison existante
+### 10.3 Maison existante
 
 | Critère | Poids | Source |
 |---|---|---|
@@ -215,7 +218,7 @@ Les filtres affichés dépendent de la catégorie du projet. L'utilisateur peut 
 | Risques naturels | 10% | Géorisques |
 | Proximité POI | 10% | OSM |
 
-### 9.4 Appartement
+### 10.4 Appartement
 
 | Critère | Poids | Source |
 |---|---|---|
@@ -226,7 +229,7 @@ Les filtres affichés dépendent de la catégorie du projet. L'utilisateur peut 
 | Étage / ascenseur | 10% | Annonce |
 | Risques naturels | 10% | Géorisques |
 
-### 9.5 Investissement locatif
+### 10.5 Investissement locatif
 
 | Critère | Poids | Source |
 |---|---|---|
@@ -239,7 +242,7 @@ Les filtres affichés dépendent de la catégorie du projet. L'utilisateur peut 
 
 Les poids sont personnalisables par l'utilisateur.
 
-### 9.6 Critères transverses — risques technologiques, climat & environnement
+### 10.6 Critères transverses — risques technologiques, climat & environnement
 
 Ces critères s'appliquent à **toutes les catégories** (logement et investissement). Ils sont ajoutés aux grilles ci-dessus, avec leurs propres pondérations par défaut et toggles pour les désactiver.
 
@@ -294,10 +297,13 @@ L'utilisateur peut sauvegarder des biens en favoris sans les associer à un proj
 | Champ | Type | Description |
 |---|---|---|
 | user_id | UUID | Utilisateur (null si déconnecté) |
-| bien_id | UUID | Bien favori |
+| target_type | ENUM | terrain / bien (aligné sur scores.target_type) |
+| target_id | UUID | FK vers terrains ou biens |
 | projet_id | UUID | Projet associé (optionnel) |
 | created_at | TIMESTAMPTZ | Date d'ajout |
 | notes | TEXT | Note personnelle (optionnel) |
+
+> Modèle canonique : wave-01 §13.
 
 ---
 

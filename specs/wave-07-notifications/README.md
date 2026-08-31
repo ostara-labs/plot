@@ -10,15 +10,15 @@
 
 ### Types de notifications
 
-| Type | Canal | Description |
-|---|---|---|
-| **Nouvelle offre** | Email + Push + In-app | Nouveau bien correspondant au projet |
-| **Mise à jour offre** | In-app | Prix changé, photos ajoutées |
-| **Annonce vendue/louée** | Email + In-app | Le bien d'un favori a été vendu/loué |
-| **Signalement** | Email + In-app | Votre annonce a été signalée |
-| **Réponse contact** | Email + In-app | Un vendeur a répondu à votre message |
-| **Compte** | Email | Vérification, reset MDP, bienvenue |
-| **Récap hebdo** | Email | Résumé des nouvelles offres de vos projets |
+| Type | Canal | Description | Valeur enum |
+|---|---|---|---|
+| **Nouvelle offre** | Email + Push + In-app | Nouveau bien correspondant au projet | nouvelle_offre |
+| **Mise à jour offre** | In-app | Prix changé, photos ajoutées | mise_a_jour |
+| **Annonce vendue/louée** | Email + In-app | Le bien d'un favori a été vendu/loué | annonce_statut |
+| **Signalement** | Email + In-app | Votre annonce a été signalée | signalement |
+| **Réponse contact** | Email + In-app | Un vendeur a répondu à votre message | contact |
+| **Compte** | Email | Vérification, reset MDP, bienvenue | compte |
+| **Récap hebdo** | Email | Résumé des nouvelles offres de vos projets | recap_hebdo |
 
 ### Fréquence (configurable par l'utilisateur)
 
@@ -70,12 +70,14 @@
 |---|---|---|
 | id | UUID | PK |
 | user_id | UUID | FK users |
-| type | ENUM | nouvelle_offre, mise_a_jour, signalement, contact, compte |
+| type | ENUM | nouvelle_offre / mise_a_jour / annonce_statut / signalement / contact / compte / recap_hebdo (canonique : wave-01 §13) |
 | titre | TEXT | Titre court |
 | message | TEXT | Description |
 | lien | TEXT | URL de destination |
 | lu | BOOLEAN | Notification lue |
 | created_at | TIMESTAMPTZ | |
+
+> Modèle canonique : table `notifications` définie dans wave-01 §13.
 
 ---
 
@@ -93,6 +95,7 @@
 | **Signalement reçu** | Annonce signalée | Détails du signalement |
 | **Contact vendeur** | Nouveau message | Message + coordonnées |
 | **Réponse vendeur** | Réponse reçue | Message du vendeur |
+| **Réponse feedback** | Réponse de l'équipe à un feedback utilisateur (wave-06/08) |
 
 ### Outil
 

@@ -21,8 +21,10 @@ La France compte plusieurs langues régionales qui font partie de son patrimoine
 | Alsacien | `gsw` | Alsace |
 | Créole réunionnais | `rcf` | Réunion |
 | Créole guadeloupéen | `gcf` | Guadeloupe |
-| Créole martiniquais | `gcf` | Martinique |
+| Créole martiniquais | `gcf-MQ` | Martinique |
 | Créole guyanais | `gcr` | Guyane |
+
+> `gcf-MQ` : variante régionale du créole à base française.
 
 ## Stratégie
 

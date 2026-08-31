@@ -19,11 +19,15 @@ Plot est un outil web qui aide les particuliers à trouver le meilleur logement 
 | Auth | FastAPI Users (open-source) |
 | Données géo | geopandas, shapely, pyproj |
 | Base de données | PostgreSQL + PostGIS |
-| Cache | Redis |
+| Tile server | Martin (tuiles vectorielles PostGIS → MapLibre) |
+| Cache / Rate limit | Redis |
+| Ingestion ETL | Airflow + dbt (réplication open data locale — 27.9/27.10) |
+| Emails | Postmark (transactionnel + digest) |
+| SMS | SMSemode / Sarbacane (OTP, alertes) |
 | Analytics | Plausible |
 | Monitoring | Sentry + Uptime Kuma |
 | i18n | Paraglide (SvelteKit) — FR/EN |
-| Déploiement | Docker Compose (dev) → AWS / Railway (prod) |
+| Déploiement | Docker Compose (dev) → Railway / ECS Fargate (prod) |
 
 ---
 
@@ -102,7 +106,7 @@ Avant de commencer l'implémentation d'une wave, celle-ci doit être **mature**.
 
 | Wave | Sujet | Statut |
 |---|---|---|
-| [Wave 01 — Fondation](wave-01-fondation/README.md) | Vision, stack, concepts clés, sources de données, modèle de données, architectures backend/frontend, i18n (FR/EN), auth, mobile, RGPD, analytics, SEO, monitoring, CI/CD | ✅ Spécifié |
+| [Wave 01 — Fondation](wave-01-fondation/README.md) | Vision, stack, concepts clés, sources de données, modèle de données, architectures backend/frontend, i18n (FR/EN), auth, mobile, RGPD, analytics, SEO, monitoring, CI/CD | 🟡 Mature |
 | [Wave 02 — Recherche](wave-02-recherche/README.md) | Page d'accueil, wizard de création, carte logement, critères d'évaluation, favoris, export PDF, partage | ✅ Spécifié |
 | [Wave 03 — Annonces](wave-03-annonces/README.md) | Déposer une annonce, fiche détaillée, photos/médias, contact vendeur | ✅ Spécifié |
 | [Wave 04 — Investissement](wave-04-investissement/README.md) | Carte investissement, calques, dessin de zone, priorités, pondération | ✅ Spécifié |
@@ -112,6 +116,19 @@ Avant de commencer l'implémentation d'une wave, celle-ci doit être **mature**.
 | [Wave 08 — Backoffice](wave-08-backoffice/README.md) | Interface admin, modération, gestion users/signalements/feedbacks | ✅ Spécifié |
 | [Wave 09 — PWA / Offline](wave-09-pwa-offline/README.md) | Service worker, cache, synchronisation, mode hors-ligne | ✅ Spécifié |
 | [Wave 10 — Langues régionales](wave-10-langues-regionales/README.md) | Breton, occitan, basque, corse, alsacien, créoles | 🔜 À spécifier |
+| [Wave 11 — Espace annonceur](wave-11-espace-annonceur/README.md) | Mes annonces, boîte contacts, stats, score fiabilité (27.23) | 🔜 À spécifier |
+| [Wave 12 — Modération & anti-abus](wave-12-moderation-antabuse/README.md) | File de modération, interaction auto/manuel, anti-abus signaleur (27.25 — analyse préalable requise) | 🔬 Analyse préalable |
+
+### Personas futurs
+
+Deux personas supplémentaires à intégrer dans une **future wave** (non spécifiée à ce jour) :
+
+| Persona | Besoins pressentis |
+|---|---|
+| **Bailleur** (landlord) | Gestion des bails, état des lieux, quittancement, suivi des loyers, fiscalité locative |
+| **Locataire** (tenant) | Recherche de location, état des lieux d'entrée/sortie, suivi des droits, quittances |
+
+Ces personas étendront le modèle `users` (actuellement `particulier` / `agence` / `notaire`) et ouvriront de nouveaux parcours, données et sous-produits. À murir dans une wave dédiée.
 
 ---
 
@@ -234,11 +251,11 @@ Le MVP se concentre sur **logement principal — terrain enterrée** + **systèm
 
 1. **Backend** :
    - API FastAPI avec CRUD projets
-   - Intégration cadastre (parcelles par zone)
-   - Intégration altimétrie (pente, exposition)
+   - Pipeline ETL cadastre → table `terrains` (réplication locale — 27.9)
+   - Pipeline ETL altimétrie (pente, exposition → colonnes dédiées)
    - Scoring terrain enterrée (pente, prix, constructibilité)
    - Détection nouvelles offres
-   - PostgreSQL + PostGIS
+   - PostgreSQL + PostGIS + Martin (tuiles)
 
 2. **Frontend** :
    - Page d'accueil : liste projets + création
@@ -261,28 +278,31 @@ Le MVP se concentre sur **logement principal — terrain enterrée** + **systèm
 ## 18. Commandes utiles
 
 ```bash
-# Backend
-cd backend
-pip install -e ".[dev]"
-uvicorn app.main:app --reload
-pytest
+# Backend (python/)
+cd python
+uv sync
+uv run uvicorn app.main:app --reload
+uv run pytest
 
-# Frontend
-cd frontend
+# Frontend (typescript/)
+cd typescript
 pnpm install
 pnpm dev
 pnpm build
+
+# Racine (gate complet)
+make ci
 ```
 
 ---
 
 ## 19. Prochaines étapes
 
-1. [ ] Setup backend FastAPI + PostGIS
+1. [ ] Setup backend FastAPI + PostGIS + Martin
 2. [ ] Modèle de données projets + terrains
 3. [ ] API CRUD projets
-4. [ ] Intégrer API cadastre
-5. [ ] Intégrer API altimétrie (pente, exposition)
+4. [ ] Pipeline ETL cadastre (Airflow + dbt → table `terrains`)
+5. [ ] Pipeline ETL altimétrie (pente, exposition)
 6. [ ] Implémenter scoring terrain enterrée
 7. [ ] Setup frontend SvelteKit
 8. [ ] Page d'accueil (liste projets)
