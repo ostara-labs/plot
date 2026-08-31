@@ -1,0 +1,45 @@
+# Trust boundary configuration.
+#
+# Files matched by these patterns define the automation that enforces the
+# project's quality and safety guarantees: CI pipelines, dependency policy,
+# release automation, review routing, and governance documents.
+#
+# Consumed by:
+#   1. .github/workflows/pr-classify.yml - labels matching PRs with
+#      "requires-human-review" and posts a comment listing what was touched.
+#   2. The "main-protection" branch ruleset - code-owner approval is
+#      REQUIRED for these paths (see CODEOWNERS; provision via
+#      scripts/setup-rulesets.sh).
+#
+# Patterns are shell globs matched against changed file paths
+# (`**` crosses directory boundaries). Keep this list tight: every entry
+# adds friction for legitimate maintenance work.
+
+paths:
+  # CI/CD pipeline definitions (and this file itself)
+  - .github/workflows/**
+  - .github/trust-boundary.yml
+
+  # Dependency policy and review routing
+  - .github/dependabot.yml
+  - .github/CODEOWNERS
+
+  # Local hook configuration - the quality-gate guardrail (the Makefile
+  # itself is intentionally NOT gated: agents are free to extend build
+  # targets without human review)
+  - .pre-commit-config.yaml
+
+  # Release automation
+  - release-please-config.json
+  - .release-please-manifest.json
+
+  # Governance and legal
+  - LICENSE
+  - SECURITY.md
+
+  # Security scanning policy
+  - .gitleaks.toml
+  - .gitleaksignore
+
+  # Ruleset provisioning script
+  - scripts/setup-rulesets.sh

@@ -1,0 +1,43 @@
+# CODEOWNERS - ownership-based review routing.
+#
+# Philosophy: normal PRs (dependency bumps, docs, code) merge without a
+# mandatory human approval. Files on the TRUST BOUNDARY - CI pipelines,
+# dependency policy, release automation, security governance - require
+# explicit approval from a listed owner. Enforcement lives in the
+# "main-protection" branch ruleset ("require review from code owners").
+#
+# Maintainer identity: @Oloompa (see MANIFEST.md).
+
+# Default: no global owner. Add one here if you want every file reviewed.
+# *       @your-org/maintainers
+
+# --- Trust boundary (human approval required) -----------------------------
+
+# CI/CD pipeline definition and classification config itself
+/.github/workflows/            @Oloompa
+/.github/trust-boundary.yml    @Oloompa
+
+# Dependency policy
+/.github/dependabot.yml        @Oloompa
+
+# Review-routing rules (self-protecting)
+/.github/CODEOWNERS            @Oloompa
+
+# Hook configuration (quality gate guardrail). NOTE: /Makefile is
+# deliberately NOT owned - AI agents may extend build targets freely.
+/.pre-commit-config.yaml       @Oloompa
+
+# Release automation
+/release-please-config.json    @Oloompa
+/.release-please-manifest.json @Oloompa
+
+# Governance and legal
+/LICENSE                       @Oloompa
+/SECURITY.md                   @Oloompa
+
+# Security scanning policy
+/.gitleaks.toml                @Oloompa
+/.gitleaksignore               @Oloompa
+
+# Ruleset provisioning script (grants the protections above)
+/scripts/setup-rulesets.sh     @Oloompa

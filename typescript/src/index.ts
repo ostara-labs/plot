@@ -33,7 +33,12 @@ export function pricePerSqm(t: Terrain): number {
  */
 export function score(t: Terrain, budget: number): ScoredTerrain {
   const psm = pricePerSqm(t);
-  const affordability = psm > 0 ? Math.min(budget / (psm * t.areaSqm), 1) : 0;
+  const affordability =
+    t.priceEur === 0 && t.areaSqm > 0
+      ? 1 // free terrain: fully affordable
+      : psm > 0
+        ? Math.min(budget / (psm * t.areaSqm), 1)
+        : 0;
   const sizeFit = Math.min(t.areaSqm / 500, 1); // 500 sqm = ideal
   const buildableBonus = t.buildable ? 1 : 0;
 

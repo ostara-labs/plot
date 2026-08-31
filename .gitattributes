@@ -1,0 +1,21 @@
+* text=auto eol=lf
+
+*.ps1 text eol=crlf
+
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+Cargo.lock linguist-generated -diff
+pnpm-lock.yaml linguist-generated -diff
+mix.lock linguist-generated -diff
+uv.lock linguist-generated -diff
+
+*.rs diff=rust
+*.ts diff=typescript
+*.py diff=python
+*.ex diff=elixir
+*.exs diff=elixir
