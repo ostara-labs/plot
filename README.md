@@ -8,9 +8,9 @@ terrain) — each with its own criteria, scoring weights, and data sources.
 Multi-language monorepo: TypeScript frontend + Python backend behind one GNU
 Make entrypoint, built from the [ostara-labs repo-template](https://github.com/ostara-labs/repo-template).
 
-[![CI](https://github.com/ostara-labs/carto/actions/workflows/ci.yml/badge.svg)](https://github.com/ostara-labs/carto/actions/workflows/ci.yml)
-[![Security](https://github.com/ostara-labs/carto/actions/workflows/security.yml/badge.svg)](https://github.com/ostara-labs/carto/actions/workflows/security.yml)
-[![Release](https://img.shields.io/github/v/release/ostara-labs/carto)](https://github.com/ostara-labs/carto/releases)
+[![CI](https://github.com/ostara-labs/plot/actions/workflows/ci.yml/badge.svg)](https://github.com/ostara-labs/plot/actions/workflows/ci.yml)
+[![Security](https://github.com/ostara-labs/plot/actions/workflows/security.yml/badge.svg)](https://github.com/ostara-labs/plot/actions/workflows/security.yml)
+[![Release](https://img.shields.io/github/v/release/ostara-labs/plot)](https://github.com/ostara-labs/plot/releases)
 
 ## Stacks
 
