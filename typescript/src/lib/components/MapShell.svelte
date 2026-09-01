@@ -13,8 +13,12 @@
 	 */
 	onMount(() => {
 		let map: MapLibreMap | undefined;
+		let disposed = false;
 		void (async () => {
 			const { default: maplibregl } = await import('maplibre-gl');
+			// The component may have been destroyed while the dynamic import
+			// was pending — never build a map for a detached container.
+			if (disposed) return;
 			map = new maplibregl.Map({
 				container,
 				style: {
@@ -35,6 +39,7 @@
 		})();
 
 		return () => {
+			disposed = true;
 			map?.remove();
 		};
 	});
