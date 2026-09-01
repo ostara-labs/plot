@@ -1,0 +1,14 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "home.title": "Find the best home in France",
+  "home.subtitle": "Compare land, houses and apartments with intelligent scoring.",
+  "home.map_placeholder": "Interactive map (placeholder)",
+  "project.new_button": "+ New project",
+  "project.list_title": "My projects",
+  "project.list_empty": "No projects yet. Create your first search project.",
+  "nav.home": "Home",
+  "language.switch": "Change language",
+  "language.fr": "French",
+  "language.en": "English",
+  "status.scaffold": "Technical scaffold — no functional flows are available yet."
+}
