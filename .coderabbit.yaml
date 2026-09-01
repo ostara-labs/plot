@@ -20,7 +20,9 @@ reviews:
         does not reveal intent: vague names (data, tmp, res, obj, val, foo),
         invented abbreviations, or French identifiers. All technical names are
         English, spelled out, units with the _in_ pattern (price_in_euros).
-        Booleans read as predicates (is_blocked).
+        Booleans read as predicates (is_blocked). Exception: official French
+        administrative designations (siret, commune, insee) are proper names
+        and stay as-is.
     - path: "typescript/src/**"
       instructions: >-
         Flag any identifier that does not reveal intent: vague names

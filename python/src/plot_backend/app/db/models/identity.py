@@ -26,7 +26,7 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(Text)
     last_name: Mapped[str | None] = mapped_column(Text)
     first_name: Mapped[str | None] = mapped_column(Text)
-    type: Mapped[UserType | None] = mapped_column(enum_column(UserType, "user_type"))
+    account_type: Mapped[UserType | None] = mapped_column(enum_column(UserType, "user_type"))
     siret: Mapped[str | None] = mapped_column(Text)
     role: Mapped[UserRole] = mapped_column(
         enum_column(UserRole, "user_role"),

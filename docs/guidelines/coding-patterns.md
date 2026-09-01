@@ -37,8 +37,10 @@ territory.
 
 ## Naming (decision 27.27)
 
-Every technical identifier is English, spelled out, and reveals intent —
-the only French in the repo is product documentation (`specs/`, `SPEC.md`).
+Every technical identifier is English, spelled out, and reveals intent.
+French appears only in product documentation (`specs/`, `SPEC.md`) and in
+official French administrative designations (`siret`, `commune`, `insee`)
+— proper names, not abbreviations.
 
 - **Names reveal intent**: `reliability_score`, not `score` or
   `score_fiabilite`. Length proportional to scope; no invented
@@ -52,8 +54,8 @@ the only French in the repo is product documentation (`specs/`, `SPEC.md`).
   (`ListingStatus.RENTED`); UI labels are Paraglide's job, not the data
   model's.
 - **Enforcement**: casing via `ruff` (pep8-naming) and Biome
-  `namingConvention`; vague names via `tests/test_naming.py`; intent via
-  CodeRabbit `path_instructions` ("flag names that do not reveal
+  `useNamingConvention`; vague names via `python/tests/test_naming.py`;
+  intent via CodeRabbit `path_instructions` ("flag names that do not reveal
   intent"). Never suppress — extend the ban list instead.
 
 ## Clean Architecture

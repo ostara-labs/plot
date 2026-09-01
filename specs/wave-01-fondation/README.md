@@ -216,7 +216,7 @@ Résumé :
 | email | TEXT | Email (unique) |
 | last_name | TEXT | Nom |
 | first_name | TEXT | Prénom |
-| type | ENUM | individual / agency / notary |
+| account_type | ENUM | individual / agency / notary |
 | siret | TEXT | SIRET (si pro) |
 | role | ENUM | user / moderator / admin (défaut: user — backoffice wave-08) |
 | is_blocked | BOOLEAN | Compte désactivé par modération (récupérable) |
@@ -233,13 +233,13 @@ Résumé :
 | id | UUID | PK |
 | user_id | UUID | FK vers users — **NULL si projet local (déconnecté)**, renseigné à la sync (wave-09) |
 | name | TEXT | Nom du projet |
-| type | ENUM | housing / investment |
+| project_type | ENUM | housing / investment |
 | category | ENUM | buried-terrain / classic-terrain / house / apartment (l'option "Terrain" en investissement = buried-terrain ou classic-terrain) |
 | criteria | JSONB | Paramètres de recherche sauvegardés (config, pas filtré — voir 27.2) |
 | zone | GEOMETRY(POLYGON, 4326) | Zone de recherche dessinée |
 | zone_center | GEOMETRY(POINT, 4326) | Centre si recherche par rayon |
 | zone_radius_in_kilometers | FLOAT | Rayon si recherche circulaire |
-| max_budget | FLOAT | Budget maximum |
+| max_budget_in_euros | FLOAT | Budget maximum |
 | latest_results | JSONB | IDs des résultats sauvegardés (détection nouvelles offres) |
 | new_offers_count | INT | Nombre de nouvelles offres |
 | created_at | TIMESTAMPTZ | |
@@ -296,7 +296,7 @@ Profils de pondération sauvegardés (wave-04). Par utilisateur, réutilisables 
 | Colonne | Type | Description |
 |---|---|---|
 | id | UUID | PK |
-| type | ENUM | house / apartment |
+| property_type | ENUM | house / apartment |
 | address | TEXT | Adresse complète |
 | commune | TEXT | Code INSEE + nom |
 | surface_in_square_meters | FLOAT | Surface habitable |
@@ -316,7 +316,7 @@ Profils de pondération sauvegardés (wave-04). Par utilisateur, réutilisables 
 |---|---|---|
 | id | UUID | PK |
 | target_type | ENUM | terrain / property |
-| target_id | UUID | FK vers terrains ou properties |
+| target_id | UUID | Cible polymorphe (terrain ou property) — pas de FK (une FK ne peut pas viser deux tables) |
 | category | TEXT | buried-terrain / classic-terrain / house / apartment |
 | score | FLOAT | Score calculé (0-100) |
 | breakdown | JSONB | Score par critère |
@@ -328,7 +328,7 @@ Profils de pondération sauvegardés (wave-04). Par utilisateur, réutilisables 
 |---|---|---|
 | id | UUID | PK |
 | owner_id | UUID | FK vers users (propriétaire de l'annonce) |
-| type | ENUM | terrain / house / apartment |
+| listing_type | ENUM | terrain / house / apartment |
 | status | ENUM | active / under_offer / sold / rented / archived / disabled / deleted / reported |
 | address | TEXT | Adresse complète |
 | commune | TEXT | Code INSEE + nom |
@@ -355,7 +355,7 @@ Profils de pondération sauvegardés (wave-04). Par utilisateur, réutilisables 
 | listing_id | UUID | FK vers listings |
 | user_id | UUID | FK vers users (nullable si déconnecté) |
 | device_fingerprint | TEXT | Hash du navigateur (pour déconnecté) |
-| type | ENUM | sold / under_offer / fraud / price_error / other |
+| report_type | ENUM | sold / under_offer / fraud / price_error / other |
 | message | TEXT | Message libre (optionnel) |
 | status | ENUM | pending / processed / rejected (modération wave-08) |
 | created_at | TIMESTAMPTZ | |
@@ -367,7 +367,7 @@ Profils de pondération sauvegardés (wave-04). Par utilisateur, réutilisables 
 | id | UUID | PK |
 | listing_id | UUID | FK vers listings |
 | user_id | UUID | FK vers users (requérant) |
-| type | ENUM | owner / agent / agency / notary |
+| claim_type | ENUM | owner / agent / agency / notary |
 | proof_document_url | TEXT | URL du justificatif uploadé |
 | status | ENUM | pending / approved / rejected |
 | admin_note | TEXT | Commentaire admin |
@@ -381,7 +381,7 @@ Profils de pondération sauvegardés (wave-04). Par utilisateur, réutilisables 
 | id | UUID | PK |
 | user_id | UUID | FK vers users — NULL si déconnecté (27.26) |
 | tracking_token | TEXT | Token de suivi local (si non connecté — 27.26) |
-| type | ENUM | bug / idea / question / complaint |
+| feedback_type | ENUM | bug / idea / question / complaint |
 | message | TEXT | Contenu du feedback |
 | page | TEXT | Page où le feedback a été fait |
 | context | JSONB | Données contextuelles (projet courant, filtres, etc.) |
@@ -413,7 +413,7 @@ Propriétés/terrains favoris (wave-02). Cible polymorphe (terrain ou property).
 | id | UUID | PK |
 | user_id | UUID | FK vers users |
 | target_type | ENUM | terrain / property (aligné sur scores.target_type) |
-| target_id | UUID | FK vers terrains ou properties |
+| target_id | UUID | Cible polymorphe (terrain ou property) — pas de FK |
 | project_id | UUID | FK vers projects (nullable — favori hors projet) |
 | notes | TEXT | Notes personnelles (optionnel) |
 | created_at | TIMESTAMPTZ | |
@@ -426,7 +426,7 @@ Liens de partage par token (wave-02 : projet / comparatif / carte).
 |---|---|---|
 | id | UUID | PK |
 | token | TEXT | Token public (unique, indexé) |
-| type | ENUM | project / comparison / map |
+| share_type | ENUM | project / comparison / map |
 | user_id | UUID | FK vers users (créateur) |
 | target_id | UUID | ID de l'objet partagé |
 | expires_at | TIMESTAMPTZ | Expiration (défaut 30j) |
@@ -441,7 +441,7 @@ Notifications in-app (wave-07 — définition canonique déplacée ici).
 |---|---|---|
 | id | UUID | PK |
 | user_id | UUID | FK vers users |
-| type | ENUM | new_offer / update / listing_status / report / contact / account / weekly_digest |
+| notification_type | ENUM | new_offer / update / listing_status / report / contact / account / weekly_digest |
 | title | TEXT | Titre |
 | message | TEXT | Corps |
 | link | TEXT | URL relative de destination |
@@ -925,7 +925,7 @@ Le scoring travaille sur des colonnes (matériau pré-calculé + index), cohére
 
 **Double stockage** :
 - `geometry` en **EPSG:4326** (WGS84) pour MapLibre GL JS
-- `geometry_lambert_93` en **EPSG:2154** (RGF93 Lambert-93) pour les calculs de distance et surface (27.27 : nommage auto-documenté, ex `*_2154`)
+- `geometry_lambert_93` en **EPSG:2154** (RGF93 Lambert-93) pour les calculs de distance et surface (27.27 : nommage auto-documenté)
 
 PostGIS gère les conversions via `ST_Transform()`. Les deux colonnes sont indexées.
 

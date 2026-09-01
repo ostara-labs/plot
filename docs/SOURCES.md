@@ -25,7 +25,7 @@ https://apicarto.ign.fr/api/cadastre/parcelle?code_insee=44109&section=EX&numero
 
 | Source | Usage | URL | API doc |
 |---|---|---|---|
-| **Geo-DVF** | Geolocalized transactions by year/department | `https://files.data.gouv.fr/geo-dvf/latest/csv/{YEAR}/{DEPT}.csv.gz` | `https://www.data.gouv.fr/fr/datasets/demandes-de-valeurs-foncieres-geolocalisees/` |
+| **Geo-DVF** | Geolocalized transactions by year/department | `https://files.data.gouv.fr/geo-dvf/latest/csv/{YEAR}/departments/{DEPT}.csv.gz` | `https://www.data.gouv.fr/fr/datasets/demandes-de-valeurs-foncieres-geolocalisees/` |
 | **DVF Statistics** | Average/median price per sqm by commune | `https://www.data.gouv.fr/datasets/statistiques-dvf` | `https://www.data.gouv.fr/datasets/statistiques-dvf` |
 | **VALORIS API** | REST — median price by commune | `https://www.valoris-immo.fr/api/v1/prix-median` | `https://www.valoris-immo.fr/api/v1/docs` |
 | **DVF+ (Cerema)** | Enriched data, geomutations | `https://www.data.gouv.fr/datasets/dvf-open-data` | `https://www.data.gouv.fr/datasets/dvf-open-data` |
@@ -302,7 +302,7 @@ https://data.ademe.fr/data-fair/api/v1/datasets/dpe03existant/lines?q=25+Rue+de+
 | **Fire hydrants** | No official national source → OSM (`emergency=fire_hydrant`, ODbL) + PEI schema | `https://schema.data.gouv.fr/datakode/schema-pei/latest.html` | `https://schema.data.gouv.fr/datakode/schema-pei/latest.html` |
 | **Shops / amenities** | INSEE BPE (commune/IRIS, official) + BANCO (address, ODbL) | `https://www.data.gouv.fr/datasets/base-permanente-des-equipements-1` + `...base-nationale-des-commerces-ouverte` | `https://www.data.gouv.fr/datasets/base-permanente-des-equipements-1` |
 
-**Licences**: LO 2.0 for everything except BANCO, Enedis poles, OSM hydrants = **ODbL** (attribution required on redistribution).
+**Licences**: LO 2.0 for everything except the sources marked **ODbL** below (BANCO, Enedis poles, OSM hydrants, Atmo Data) — attribution required on redistribution.
 
 ---
 

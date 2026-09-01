@@ -58,7 +58,7 @@ class Property(Base):
     __tablename__ = "properties"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, server_default=func.gen_random_uuid())
-    type: Mapped[PropertyType] = mapped_column(enum_column(PropertyType, "property_type"))
+    property_type: Mapped[PropertyType] = mapped_column(enum_column(PropertyType, "property_type"))
     address: Mapped[str | None] = mapped_column(Text)
     commune: Mapped[str] = mapped_column(Text, index=True)
     surface_in_square_meters: Mapped[float | None] = mapped_column(Float, index=True)

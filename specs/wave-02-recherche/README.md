@@ -104,11 +104,12 @@ Chaque catégorie a ses propres critères avec sliders et toggle :
 | Pente max | Slider 0-45% | 15% |
 | Exposition | Toggle (S, SW, W, SE, E, NE, N, NW) | S, SW, SE |
 | Surface min | Slider 200-5000 m² | 500 m² |
-| Zone | Toggle (urban, periurban*, rural) — *affiché "périurbain" en UI, valeur enum `periurban` | periurban |
+| Zone | Toggle (urban, periurban, rural — affiché "périurbain" en UI, valeur enum `periurban`) | periurban |
 | Constructible | Toggle | Oui |
 | Distance ville max | Slider 5-100 km | 30 km |
 
 **Terrain classique :**
+
 | Critère | Widget | Défaut |
 |---|---|---|
 | Surface min | Slider 200-5000 m² | 500 m² |

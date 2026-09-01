@@ -7,6 +7,7 @@ from geoalchemy2 import Geometry
 from geoalchemy2.elements import WKBElement
 from sqlalchemy import DateTime, ForeignKey, Integer, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import Mapped, mapped_column
 
 from plot_backend.app.db.base import Base
@@ -30,7 +31,7 @@ class Listing(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, server_default=func.gen_random_uuid())
     owner_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
-    type: Mapped[ListingType] = mapped_column(enum_column(ListingType, "listing_type"))
+    listing_type: Mapped[ListingType] = mapped_column(enum_column(ListingType, "listing_type"))
     status: Mapped[ListingStatus] = mapped_column(
         enum_column(ListingStatus, "listing_status"),
         default=ListingStatus.ACTIVE,
@@ -49,8 +50,8 @@ class Listing(Base):
     surface_in_square_meters: Mapped[float | None] = mapped_column(index=True)
     energy_performance_class: Mapped[str | None] = mapped_column(Text, index=True)
     bedrooms: Mapped[int | None] = mapped_column(Integer, index=True)
-    photos: Mapped[dict | None] = mapped_column(JSONB)
-    features: Mapped[dict | None] = mapped_column(JSONB)
+    photos: Mapped[dict | None] = mapped_column(MutableDict.as_mutable(JSONB))
+    features: Mapped[dict | None] = mapped_column(MutableDict.as_mutable(JSONB))
     description: Mapped[str | None] = mapped_column(Text)
     source: Mapped[ListingSource] = mapped_column(
         enum_column(ListingSource, "listing_source"),
@@ -81,7 +82,7 @@ class Report(Base):
     listing_id: Mapped[UUID] = mapped_column(ForeignKey("listings.id"), index=True)
     user_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), index=True)
     device_fingerprint: Mapped[str | None] = mapped_column(Text, index=True)
-    type: Mapped[ReportType] = mapped_column(enum_column(ReportType, "report_type"))
+    report_type: Mapped[ReportType] = mapped_column(enum_column(ReportType, "report_type"))
     message: Mapped[str | None] = mapped_column(Text)
     status: Mapped[ReportStatus] = mapped_column(
         enum_column(ReportStatus, "report_status"),
@@ -99,7 +100,7 @@ class Claim(Base):
     id: Mapped[UUID] = mapped_column(primary_key=True, server_default=func.gen_random_uuid())
     listing_id: Mapped[UUID] = mapped_column(ForeignKey("listings.id"), index=True)
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
-    type: Mapped[ClaimType] = mapped_column(enum_column(ClaimType, "claim_type"))
+    claim_type: Mapped[ClaimType] = mapped_column(enum_column(ClaimType, "claim_type"))
     proof_document_url: Mapped[str | None] = mapped_column(Text)
     status: Mapped[ClaimStatus] = mapped_column(
         enum_column(ClaimStatus, "claim_status"),

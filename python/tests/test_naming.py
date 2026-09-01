@@ -27,9 +27,12 @@ BANNED_NAMES = {
     "vals",
 }
 
-# ``name =`` or ``for name in`` at a statement start (attribute or keyword
-# arguments are out of scope — see module docstring).
-ASSIGNMENT = re.compile(rf"^\s*(?:for\s+)?({'|'.join(sorted(BANNED_NAMES))})\s*=")
+# Two statement shapes: ``name =`` (optionally annotated) and
+# ``for name in ...``. Attribute and keyword arguments are out of scope —
+# see module docstring.
+_BANNED = "|".join(sorted(BANNED_NAMES))
+ASSIGNMENT = re.compile(rf"^\s*({_BANNED})\s*=")
+FOR_LOOP = re.compile(rf"^\s*for\s+({_BANNED})\s+in\b")
 
 
 def _source_files() -> list[Path]:
@@ -40,7 +43,7 @@ def test_no_vague_variable_names():
     offenders: list[str] = []
     for path in _source_files():
         for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
-            match = ASSIGNMENT.match(line)
+            match = ASSIGNMENT.match(line) or FOR_LOOP.match(line)
             if match:
                 offenders.append(f"{path.relative_to(SRC_DIR.parent)}:{lineno}: {match.group(1)}")
     assert not offenders, "Vague variable names found (27.27):\n" + "\n".join(offenders)

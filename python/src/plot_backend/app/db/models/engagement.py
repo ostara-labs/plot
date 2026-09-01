@@ -26,7 +26,7 @@ class Feedback(Base):
     id: Mapped[UUID] = mapped_column(primary_key=True, server_default=func.gen_random_uuid())
     user_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), index=True)
     tracking_token: Mapped[str | None] = mapped_column(Text, index=True)
-    type: Mapped[FeedbackType] = mapped_column(enum_column(FeedbackType, "feedback_type"))
+    feedback_type: Mapped[FeedbackType] = mapped_column(enum_column(FeedbackType, "feedback_type"))
     message: Mapped[str] = mapped_column(Text)
     page: Mapped[str | None] = mapped_column(Text)
     context: Mapped[dict | None] = mapped_column(JSONB)
@@ -77,7 +77,7 @@ class Share(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, server_default=func.gen_random_uuid())
     token: Mapped[str] = mapped_column(Text, unique=True, index=True)
-    type: Mapped[ShareType] = mapped_column(enum_column(ShareType, "share_type"))
+    share_type: Mapped[ShareType] = mapped_column(enum_column(ShareType, "share_type"))
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
     target_id: Mapped[UUID] = mapped_column()
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
@@ -92,7 +92,7 @@ class Notification(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, server_default=func.gen_random_uuid())
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
-    type: Mapped[NotificationType] = mapped_column(
+    notification_type: Mapped[NotificationType] = mapped_column(
         enum_column(NotificationType, "notification_type")
     )
     title: Mapped[str] = mapped_column(Text)

@@ -1,8 +1,8 @@
 # Plot (carto)
 
 Find the best terrain/parcel to build or invest in France. Two modes:
-**Logement principal** (buried house lot, standard lot,
-house, apartment) and **Investissement locatif** (house, apartment,
+**Primary residence** (buried house lot, standard lot,
+house, apartment) and **Rental investment** (house, apartment,
 lot) — each with its own criteria, scoring weights, and data sources.
 
 Multi-language monorepo: TypeScript frontend + Python backend behind one GNU

@@ -93,7 +93,7 @@
 
 | Action | Description |
 |---|---|
-| **Bloquer** | Désactiver le compte (récupérable) — colonne `users.is_blocked` |
+| **Bloquer** | Bloquer le compte pour modération (récupérable) — colonne `users.is_blocked` : masque les contenus mais **n'empêche pas le login** ; la désactivation complète passe par `is_active` |
 | **Supprimer** | Suppression définitive admin (hard delete — distinct de la suppression propriétaire qui reste récupérable 30 j) + données |
 | **Changer le rôle** | User ↔ Moderator ↔ Admin |
 | **Reset score** | Remettre le score de fiabilité à 50 |
