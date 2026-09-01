@@ -26,7 +26,8 @@ class Settings(BaseSettings):
     )
 
     database_url: str = "postgresql+asyncpg://plot:plot@localhost:5432/plot"
-    secret_key: str = "dev-secret-key-change-me"
+    redis_url: str = "redis://localhost:6379/0"
+    secret_key: str = "dev-secret-key-change-me-0123456789abcdef-local-only"
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 7
 
