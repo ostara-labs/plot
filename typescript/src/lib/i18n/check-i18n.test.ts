@@ -16,7 +16,9 @@ describe("flattenMessages", () => {
   });
 
   it("ignores the $schema metadata key", () => {
-    const flat = flattenMessages({ $schema: "https://example.com/schema", hello: "world" });
+    // Bracket syntax: `$schema` is a JSON-Schema convention key, exempt from
+    // the namingConvention rule (27.27).
+    const flat = flattenMessages({ ["$schema"]: "https://example.com/schema", hello: "world" });
     expect(flat).toEqual({ hello: "world" });
   });
 });
