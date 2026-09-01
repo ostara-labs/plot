@@ -35,6 +35,27 @@ errors are handled, never swallowed.
 inline. The non-mechanical part (naming, decomposition) is review
 territory.
 
+## Naming (decision 27.27)
+
+Every technical identifier is English, spelled out, and reveals intent —
+the only French in the repo is product documentation (`specs/`, `SPEC.md`).
+
+- **Names reveal intent**: `reliability_score`, not `score` or
+  `score_fiabilite`. Length proportional to scope; no invented
+  abbreviations.
+- **Units spelled out** with the `_in_` pattern in DB columns:
+  `price_in_euros`, `surface_in_square_meters`, `slope_in_percent`.
+  Official French administrative designations stay as-is (`siret`,
+  `commune`, `insee`).
+- **Booleans read as predicates**: `is_blocked`, `is_read`, `buildable`.
+- **Enums**: English class, member and stored value
+  (`ListingStatus.RENTED`); UI labels are Paraglide's job, not the data
+  model's.
+- **Enforcement**: casing via `ruff` (pep8-naming) and Biome
+  `namingConvention`; vague names via `tests/test_naming.py`; intent via
+  CodeRabbit `path_instructions` ("flag names that do not reveal
+  intent"). Never suppress — extend the ban list instead.
+
 ## Clean Architecture
 
 Dependencies point inward: domain logic knows nothing about frameworks,

@@ -76,6 +76,10 @@ mandatory: loading more dilutes attention.
 
 - TypeScript: Biome 2.x; 2-space indent
 - Python: ruff (check + format); 4-space indent
+- Naming (27.27): every technical identifier is English, spelled out,
+  intent-revealing; vague names are banned and lint/test-enforced. Specs
+  stay French; all other docs are English. See
+  `docs/guidelines/coding-patterns.md` (§ Naming).
 - Commits: Conventional Commits — types: feat, fix, docs, style, refactor,
   perf, test, build, ci, chore, revert. Breaking changes: `!` after the type
   (e.g. `feat!: ...`). Scope optional (e.g. `feat(typescript): ...`).

@@ -202,9 +202,11 @@ Résumé :
 
 ## 13. Modèle de données
 
-> **Note PostGIS (27.3)** : chaque colonne `geometry` (EPSG:4326) possède une colonne compagnon `*_2154` (EPSG:2154) pour les calculs métriques (distances, surfaces). Les deux sont indexées GiST/B-tree. Non répétées dans les tables ci-dessous.
+> **Note PostGIS (27.3)** : chaque colonne `geometry` (EPSG:4326) possède une colonne compagnon `*_lambert_93` (EPSG:2154) pour les calculs métriques (distances, surfaces). Les deux sont indexées GiST/B-tree. Non répétées dans les tables ci-dessous.
 >
 > **Note colonnes (27.2)** : toute donnée filtrable/triable/scorée est une colonne dédiée indexée. Les JSONB listés ici sont display-only ou paramétrage (jamais filtrés).
+>
+> **Note nommage (27.27)** : tous les identifiants (tables, colonnes, enums, valeurs stockées) sont en anglais, mots complets, unités épelées avec le motif `_in_`. La prose de la spec reste française ; seuls les identifiants techniques sont anglais.
 
 ### Table `users`
 
@@ -212,51 +214,51 @@ Résumé :
 |---|---|---|
 | id | UUID | PK |
 | email | TEXT | Email (unique) |
-| nom | TEXT | Nom |
-| prenom | TEXT | Prénom |
-| type | ENUM | particulier / agence / notaire |
+| last_name | TEXT | Nom |
+| first_name | TEXT | Prénom |
+| type | ENUM | individual / agency / notary |
 | siret | TEXT | SIRET (si pro) |
-| role | ENUM | user / moderateur / admin (défaut: user — backoffice wave-08) |
-| bloque | BOOLEAN | Compte désactivé par modération (récupérable) |
-| email_verifie | BOOLEAN | Email vérifié |
-| score_fiabilite | FLOAT | Score 0-100 (calculé automatiquement) |
+| role | ENUM | user / moderator / admin (défaut: user — backoffice wave-08) |
+| is_blocked | BOOLEAN | Compte désactivé par modération (récupérable) |
+| email_verified | BOOLEAN | Email vérifié (attribut code `is_verified` — fastapi-users) |
+| reliability_score | FLOAT | Score 0-100 (calculé automatiquement) |
 | locale | TEXT | Préférence langue (défaut: 'fr') |
 | created_at | TIMESTAMPTZ | |
 | updated_at | TIMESTAMPTZ | |
 
-### Table `projets`
+### Table `projects`
 
 | Colonne | Type | Description |
 |---|---|---|
 | id | UUID | PK |
 | user_id | UUID | FK vers users — **NULL si projet local (déconnecté)**, renseigné à la sync (wave-09) |
-| nom | TEXT | Nom du projet |
-| type | ENUM | logement / investissement |
-| categorie | ENUM | terrain-terre / terrain-classique / maison / appartement (l'option "Terrain" en investissement = terrain-terre ou terrain-classique) |
-| criteres | JSONB | Paramètres de recherche sauvegardés (config, pas filtré — voir 27.2) |
+| name | TEXT | Nom du projet |
+| type | ENUM | housing / investment |
+| category | ENUM | buried-terrain / classic-terrain / house / apartment (l'option "Terrain" en investissement = buried-terrain ou classic-terrain) |
+| criteria | JSONB | Paramètres de recherche sauvegardés (config, pas filtré — voir 27.2) |
 | zone | GEOMETRY(POLYGON, 4326) | Zone de recherche dessinée |
-| zone_centre | GEOMETRY(POINT, 4326) | Centre si recherche par rayon |
-| zone_rayon_km | FLOAT | Rayon si recherche circulaire |
-| budget_max | FLOAT | Budget maximum |
-| derniers_resultats | JSONB | IDs des résultats sauvegardés (détection nouvelles offres) |
-| nouvelles_offres | INT | Nombre de nouvelles offres |
-| date_creation | TIMESTAMPTZ | |
-| date_derniere_consultation | TIMESTAMPTZ | |
-| date_mise_a_jour | TIMESTAMPTZ | |
+| zone_center | GEOMETRY(POINT, 4326) | Centre si recherche par rayon |
+| zone_radius_in_kilometers | FLOAT | Rayon si recherche circulaire |
+| max_budget | FLOAT | Budget maximum |
+| latest_results | JSONB | IDs des résultats sauvegardés (détection nouvelles offres) |
+| new_offers_count | INT | Nombre de nouvelles offres |
+| created_at | TIMESTAMPTZ | |
+| last_viewed_at | TIMESTAMPTZ | |
+| updated_at | TIMESTAMPTZ | |
 
-### Table `zones_priorite`
+### Table `priority_zones`
 
 Zones de priorité dessinées sur la carte investissement (wave-04). Plusieurs par projet.
 
 | Colonne | Type | Description |
 |---|---|---|
 | id | UUID | PK |
-| projet_id | UUID | FK vers projets |
-| niveau | ENUM | haute / moyenne / basse |
-| geometry | GEOMETRY(POLYGON, 4326) | Polygone de la zone (compagnon _2154) |
+| project_id | UUID | FK vers projects |
+| level | ENUM | high / medium / low |
+| geometry | GEOMETRY(POLYGON, 4326) | Polygone de la zone (compagnon _lambert_93) |
 | created_at | TIMESTAMPTZ | |
 
-### Table `profils_ponderation`
+### Table `weighting_profiles`
 
 Profils de pondération sauvegardés (wave-04). Par utilisateur, réutilisables sur plusieurs projets.
 
@@ -264,9 +266,9 @@ Profils de pondération sauvegardés (wave-04). Par utilisateur, réutilisables 
 |---|---|---|
 | id | UUID | PK |
 | user_id | UUID | FK vers users |
-| nom | TEXT | Nom du profil |
-| categorie | ENUM | terrain-terre / terrain-classique / maison / appartement |
-| poids | JSONB | {critere: poids} — somme = 100 (config, pas filtré — 27.2) |
+| name | TEXT | Nom du profil |
+| category | ENUM | buried-terrain / classic-terrain / house / apartment |
+| weights | JSONB | {critere: poids} — somme = 100 (config, pas filtré — 27.2) |
 | created_at | TIMESTAMPTZ | |
 | updated_at | TIMESTAMPTZ | |
 
@@ -275,35 +277,35 @@ Profils de pondération sauvegardés (wave-04). Par utilisateur, réutilisables 
 | Colonne | Type | Description |
 |---|---|---|
 | id | UUID | PK |
-| parcelle_id | TEXT | Identifiant cadastre (14 car.) |
+| parcel_id | TEXT | Identifiant cadastre (14 car.) |
 | commune | TEXT | Code INSEE + nom |
-| surface_m2 | FLOAT | Surface en m² |
+| surface_in_square_meters | FLOAT | Surface en m² |
 | geometry | GEOMETRY(POLYGON, 4326) | Géométrie PostGIS |
-| zone | ENUM | urbain / periurbain / rural |
+| zone | ENUM | urban / periurban / rural |
 | buildable | BOOLEAN | Constructible selon PLU |
-| estimated_price_eur | FLOAT | Prix estimé (DVF) |
-| taxe_fonciere_eur | FLOAT | Taxe foncière annuelle moyenne (REI DGFiP) |
-| slope_pct | FLOAT | Pente moyenne (%) |
+| estimated_price_in_euros | FLOAT | Prix estimé (DVF) |
+| property_tax_in_euros | FLOAT | Taxe foncière annuelle moyenne (REI DGFiP) |
+| slope_in_percent | FLOAT | Pente moyenne (%) |
 | exposure | TEXT | Exposition (N/NE/E/SE/S/SW/W/NW) |
 | metadata | JSONB | Données PLU, POI, etc. |
 | created_at | TIMESTAMPTZ | |
 | updated_at | TIMESTAMPTZ | |
 
-### Table `biens`
+### Table `properties`
 
 | Colonne | Type | Description |
 |---|---|---|
 | id | UUID | PK |
-| type | ENUM | maison / appartement |
+| type | ENUM | house / apartment |
 | address | TEXT | Adresse complète |
 | commune | TEXT | Code INSEE + nom |
-| surface_m2 | FLOAT | Surface habitable |
-| price_eur | FLOAT | Prix demandé |
+| surface_in_square_meters | FLOAT | Surface habitable |
+| price_in_euros | FLOAT | Prix demandé |
 | geometry | GEOMETRY(POINT, 4326) | Géocodage |
-| dpe | TEXT | Étiquette énergie (A-G) |
-| ges | TEXT | Étiquette GES (A-G) |
-| loyer_potentiel_eur | FLOAT | Loyer estimé/mois |
-| taxe_fonciere_eur | FLOAT | Taxe foncière annuelle (REI DGFiP) |
+| energy_performance_class | TEXT | Étiquette énergie (A-G) |
+| greenhouse_gas_class | TEXT | Étiquette GES (A-G) |
+| potential_rent_in_euros | FLOAT | Loyer estimé/mois |
+| property_tax_in_euros | FLOAT | Taxe foncière annuelle (REI DGFiP) |
 | metadata | JSONB | DPE détaillé, POI, etc. |
 | created_at | TIMESTAMPTZ | |
 | updated_at | TIMESTAMPTZ | |
@@ -313,49 +315,49 @@ Profils de pondération sauvegardés (wave-04). Par utilisateur, réutilisables 
 | Colonne | Type | Description |
 |---|---|---|
 | id | UUID | PK |
-| target_type | ENUM | terrain / bien |
-| target_id | UUID | FK vers terrains ou biens |
-| category | TEXT | terrain-terre / terrain-classique / maison / appartement |
+| target_type | ENUM | terrain / property |
+| target_id | UUID | FK vers terrains ou properties |
+| category | TEXT | buried-terrain / classic-terrain / house / apartment |
 | score | FLOAT | Score calculé (0-100) |
 | breakdown | JSONB | Score par critère |
 | computed_at | TIMESTAMPTZ | |
 
-### Table `annonces`
+### Table `listings`
 
 | Colonne | Type | Description |
 |---|---|---|
 | id | UUID | PK |
 | owner_id | UUID | FK vers users (propriétaire de l'annonce) |
-| type | ENUM | terrain / maison / appartement |
-| statut | ENUM | active / sous_offre / vendu / loué / archivée / désactivée / supprimée / signalée |
+| type | ENUM | terrain / house / apartment |
+| status | ENUM | active / under_offer / sold / rented / archived / disabled / deleted / reported |
 | address | TEXT | Adresse complète |
 | commune | TEXT | Code INSEE + nom |
 | geometry | GEOMETRY(POLYGON ou POINT, 4326) | Géométrie (polygone si terrain, point si maison/appt) |
-| price_eur | FLOAT | Prix demandé |
-| surface_m2 | FLOAT | Surface |
-| dpe | TEXT | Étiquette DPE (A-G) — colonne dédiée (27.2, filtrable) |
-| chambres | INT | Nombre de chambres (maison/appartement) — colonne dédiée (27.2) |
-| photos | JSONB | [{url, ordre, principale}] — URLs S3 uniquement, jamais de binaires (27.2) |
-| caracteristiques | JSONB | Champs spécifiques display-only (frais_agence, charges, disponibilite…) |
+| price_in_euros | FLOAT | Prix demandé |
+| surface_in_square_meters | FLOAT | Surface |
+| energy_performance_class | TEXT | Étiquette DPE (A-G) — colonne dédiée (27.2, filtrable) |
+| bedrooms | INT | Nombre de chambres (house/apartment) — colonne dédiée (27.2) |
+| photos | JSONB | [{url, order, main}] — URLs S3 uniquement, jamais de binaires (27.2) |
+| features | JSONB | Champs spécifiques display-only (agency_fees, charges, availability…) |
 | description | TEXT | Description libre |
-| source | ENUM | manuel / import / claim |
+| source | ENUM | manual / import / claim |
 | claim_status | ENUM | none / pending / approved / rejected (aligné sur claims.status) |
-| date_depot | TIMESTAMPTZ | |
-| date_mise_a_jour | TIMESTAMPTZ | |
-| date_derniere_verification | TIMESTAMPTZ | |
-| nombre_signalements | INT | Nombre de signalements reçus |
+| submitted_at | TIMESTAMPTZ | |
+| updated_at | TIMESTAMPTZ | |
+| last_verified_at | TIMESTAMPTZ | |
+| report_count | INT | Nombre de signalements reçus |
 
-### Table `signalements`
+### Table `reports`
 
 | Colonne | Type | Description |
 |---|---|---|
 | id | UUID | PK |
-| annonce_id | UUID | FK vers annonces |
+| listing_id | UUID | FK vers listings |
 | user_id | UUID | FK vers users (nullable si déconnecté) |
 | device_fingerprint | TEXT | Hash du navigateur (pour déconnecté) |
-| type | ENUM | vendu / sous_offre / faux / erreur_prix / autre |
+| type | ENUM | sold / under_offer / fraud / price_error / other |
 | message | TEXT | Message libre (optionnel) |
-| statut | ENUM | en_attente / traite / rejeté (modération wave-08) |
+| status | ENUM | pending / processed / rejected (modération wave-08) |
 | created_at | TIMESTAMPTZ | |
 
 ### Table `claims`
@@ -363,12 +365,12 @@ Profils de pondération sauvegardés (wave-04). Par utilisateur, réutilisables 
 | Colonne | Type | Description |
 |---|---|---|
 | id | UUID | PK |
-| annonce_id | UUID | FK vers annonces |
+| listing_id | UUID | FK vers listings |
 | user_id | UUID | FK vers users (requérant) |
-| type | ENUM | proprietaire / mandataire / agence / notaire |
-| justificatif_url | TEXT | URL du justificatif uploadé |
+| type | ENUM | owner / agent / agency / notary |
+| proof_document_url | TEXT | URL du justificatif uploadé |
 | status | ENUM | pending / approved / rejected |
-| note_admin | TEXT | Commentaire admin |
+| admin_note | TEXT | Commentaire admin |
 | created_at | TIMESTAMPTZ | |
 | resolved_at | TIMESTAMPTZ | |
 
@@ -378,13 +380,13 @@ Profils de pondération sauvegardés (wave-04). Par utilisateur, réutilisables 
 |---|---|---|
 | id | UUID | PK |
 | user_id | UUID | FK vers users — NULL si déconnecté (27.26) |
-| token_suivi | TEXT | Token de suivi local (si non connecté — 27.26) |
-| type | ENUM | bug / idee / question / doléance |
+| tracking_token | TEXT | Token de suivi local (si non connecté — 27.26) |
+| type | ENUM | bug / idea / question / complaint |
 | message | TEXT | Contenu du feedback |
 | page | TEXT | Page où le feedback a été fait |
 | context | JSONB | Données contextuelles (projet courant, filtres, etc.) |
-| status | ENUM | nouveau / en_cours / traite / archive |
-| reponse | TEXT | Réponse de l'équipe (si applicable) |
+| status | ENUM | new / in_progress / processed / archived |
+| response | TEXT | Réponse de l'équipe (si applicable) |
 | user_agent | TEXT | Navigateur / device |
 | created_at | TIMESTAMPTZ | |
 | updated_at | TIMESTAMPTZ | |
@@ -396,27 +398,27 @@ Messages acheteur → vendeur (wave-03, contact vendeur). Rate limiting via Redi
 | Colonne | Type | Description |
 |---|---|---|
 | id | UUID | PK |
-| annonce_id | UUID | FK vers annonces |
-| contacteur_id | UUID | FK vers users (connecté obligatoire) |
+| listing_id | UUID | FK vers listings |
+| sender_id | UUID | FK vers users (connecté obligatoire) |
 | message | TEXT | Contenu du message |
-| lu | BOOLEAN | Lu par le vendeur |
+| is_read | BOOLEAN | Lu par le vendeur |
 | created_at | TIMESTAMPTZ | |
 
-### Table `favoris`
+### Table `favorites`
 
-Biens/terrains favoris (wave-02). Cible polymorphe (terrain ou bien).
+Propriétés/terrains favoris (wave-02). Cible polymorphe (terrain ou property).
 
 | Colonne | Type | Description |
 |---|---|---|
 | id | UUID | PK |
 | user_id | UUID | FK vers users |
-| target_type | ENUM | terrain / bien (aligné sur scores.target_type) |
-| target_id | UUID | FK vers terrains ou biens |
-| projet_id | UUID | FK vers projets (nullable — favori hors projet) |
+| target_type | ENUM | terrain / property (aligné sur scores.target_type) |
+| target_id | UUID | FK vers terrains ou properties |
+| project_id | UUID | FK vers projects (nullable — favori hors projet) |
 | notes | TEXT | Notes personnelles (optionnel) |
 | created_at | TIMESTAMPTZ | |
 
-### Table `partages`
+### Table `shares`
 
 Liens de partage par token (wave-02 : projet / comparatif / carte).
 
@@ -424,7 +426,7 @@ Liens de partage par token (wave-02 : projet / comparatif / carte).
 |---|---|---|
 | id | UUID | PK |
 | token | TEXT | Token public (unique, indexé) |
-| type | ENUM | projet / compare / carte |
+| type | ENUM | project / comparison / map |
 | user_id | UUID | FK vers users (créateur) |
 | target_id | UUID | ID de l'objet partagé |
 | expires_at | TIMESTAMPTZ | Expiration (défaut 30j) |
@@ -439,11 +441,11 @@ Notifications in-app (wave-07 — définition canonique déplacée ici).
 |---|---|---|
 | id | UUID | PK |
 | user_id | UUID | FK vers users |
-| type | ENUM | nouvelle_offre / mise_a_jour / annonce_statut / signalement / contact / compte / recap_hebdo |
-| titre | TEXT | Titre |
+| type | ENUM | new_offer / update / listing_status / report / contact / account / weekly_digest |
+| title | TEXT | Titre |
 | message | TEXT | Corps |
-| lien | TEXT | URL relative de destination |
-| lu | BOOLEAN | Lue |
+| link | TEXT | URL relative de destination |
+| is_read | BOOLEAN | Lue |
 | created_at | TIMESTAMPTZ | |
 
 ---
@@ -923,7 +925,7 @@ Le scoring travaille sur des colonnes (matériau pré-calculé + index), cohére
 
 **Double stockage** :
 - `geometry` en **EPSG:4326** (WGS84) pour MapLibre GL JS
-- `geometry_2154` en **EPSG:2154** (RGF93 Lambert-93) pour les calculs de distance et surface
+- `geometry_lambert_93` en **EPSG:2154** (RGF93 Lambert-93) pour les calculs de distance et surface (27.27 : nommage auto-documenté, ex `*_2154`)
 
 PostGIS gère les conversions via `ST_Transform()`. Les deux colonnes sont indexées.
 
@@ -1085,3 +1087,15 @@ Deux personas supplémentaires à intégrer dans une future wave :
 - Endpoint `GET /api/feedback/mine` : l'utilisateur suit le statut de ses feedbacks (statut + réponse)
 - Notification in-app à la réponse de l'équipe (type `compte` ou dédié — wave-07)
 - "Convertir en issue GitHub" : action **manuelle** de l'admin (pas d'intégration automatisée)
+
+### 27.27 Convention de nommage (full English)
+
+Décision utilisateur (2026-09-01) : **tout identifiant technique est en anglais** — mots complets, sans abréviation inventée. Seule la documentation produit (specs/, SPEC.md) reste en français.
+
+- **Code (Python/TS)** : variables, fonctions, classes, attributs en anglais, révélant l'intention (`reliability_score`, pas `score_fiabilite` ni `score`). Abréviations interdites sauf conventions écosystème établies (`id`, `url`, `db`, module `deps` de FastAPI, alias `m` de Paraglide).
+- **DB** : tables, colonnes, types et valeurs d'enum en anglais (`listings`, `properties`, `reports`, `priority_zones`, `weighting_profiles`, `favorites`, `shares`, `energy_performance_class`, `email_verified`, valeurs `"rented"`, `"high"`, `"under_offer"`...). Les unités sont épelées avec le motif `_in_` (`price_in_euros`, `surface_in_square_meters`, `zone_radius_in_kilometers`, `slope_in_percent`).
+- **Noms propres administratifs français conservés** : ce sont des noms officiels, pas des abréviations (`siret`, `commune`, `insee`, `plu`, `dvf`).
+- **Géométries (27.3 révisé)** : compagnon métrique `*_lambert_93` (EPSG:2154) au lieu de `*_2154` — nom de projection officiel auto-documenté.
+- **Enums** : classes/membres/valeurs anglais (`ListingStatus.RENTED`), la traduction UI se fait côté Paraglide (contenu vs libellés).
+- **Docs** : specs/ + SPEC.md en français (référentiel produit) ; tout le reste (docs/, README, AGENTS.md, commentaires de code, PR) en anglais.
+- **Garantir** : ruff `N` (pep8-naming) + `tests/test_naming.py` (liste noire noms vagues : `data`, `tmp`, `res`, `obj`...) côté Python ; Biome `namingConvention` + `naming.test.ts` côté TypeScript ; `.coderabbit.yaml` avec path_instructions "flag names that do not reveal intent".
