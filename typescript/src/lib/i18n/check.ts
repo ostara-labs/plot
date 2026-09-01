@@ -15,9 +15,9 @@ export type MessageFile = Record<string, unknown>;
  * snake_case keys (`project.new_button`) and nested objects. The `$schema`
  * key is metadata and is ignored.
  */
-export function flattenMessages(obj: MessageFile, prefix = ""): Record<string, string> {
+export function flattenMessages(messageNode: MessageFile, prefix = ""): Record<string, string> {
   const result: Record<string, string> = {};
-  for (const [key, value] of Object.entries(obj)) {
+  for (const [key, value] of Object.entries(messageNode)) {
     if (key === "$schema") continue;
     const fullKey = prefix ? `${prefix}.${key}` : key;
     if (typeof value === "string") {
