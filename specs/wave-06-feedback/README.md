@@ -33,8 +33,8 @@ Un widget de feedback accessible depuis toutes les pages permet aux utilisateurs
 │                             │
 │  📎 Joindre un screenshot   │
 │                             │
-│  Page : /logement/terrain-  │
-│  terre (auto-détecté)       │
+│  Page : /logement/buried-   │
+│  terrain (auto-détecté)     │
 │                             │
 │  [Envoyer]                  │
 └─────────────────────────────┘

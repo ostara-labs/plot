@@ -76,8 +76,8 @@ Selon le type choisi :
 **Logement principal :**
 | Catégorie | Description |
 |---|---|
-| Terrain pour maison enterrée (`terrain-terre`) | Terrain pour construction enterrée/semi-enterrée |
-| Terrain construction classique (`terrain-classique`) | Terrain pour maison traditionnelle |
+| Terrain pour maison enterrée (`buried-terrain`) | Terrain pour construction enterrée/semi-enterrée |
+| Terrain construction classique (`classic-terrain`) | Terrain pour maison traditionnelle |
 | Maison | Maison existante |
 | Appartement | Appartement existant |
 
@@ -86,7 +86,7 @@ Selon le type choisi :
 |---|---|
 | Maison | Maison en location |
 | Appartement | Appartement en location |
-| Terrain (`terrain-terre` ou `terrain-classique`) | Terrain à construire puis louer |
+| Terrain (`buried-terrain` ou `classic-terrain`) | Terrain à construire puis louer |
 
 #### Étape 3 : Zone géographique
 
@@ -104,7 +104,7 @@ Chaque catégorie a ses propres critères avec sliders et toggle :
 | Pente max | Slider 0-45% | 15% |
 | Exposition | Toggle (S, SW, W, SE, E, NE, N, NW) | S, SW, SE |
 | Surface min | Slider 200-5000 m² | 500 m² |
-| Zone | Toggle (urbain, periurbain*, rural) — *affiché "périurbain" en UI, valeur enum sans accent | périurbain |
+| Zone | Toggle (urban, periurban*, rural) — *affiché "périurbain" en UI, valeur enum `periurban` | periurban |
 | Constructible | Toggle | Oui |
 | Distance ville max | Slider 5-100 km | 30 km |
 
@@ -112,7 +112,7 @@ Chaque catégorie a ses propres critères avec sliders et toggle :
 | Critère | Widget | Défaut |
 |---|---|---|
 | Surface min | Slider 200-5000 m² | 500 m² |
-| Zone | Toggle | périurbain |
+| Zone | Toggle | periurban |
 | Constructible | Toggle | Oui |
 
 **Maison :**
@@ -289,7 +289,7 @@ L'utilisateur peut sauvegarder des biens en favoris sans les associer à un proj
 |---|---|
 | **Ajouter aux favoris** | Clic sur le cœur (connecté) ou stocké localement (déconnecté) |
 | **Retirer des favoris** | Clic sur le cœur barré |
-| **Voir les favoris** | Page dédiée `/favoris` avec liste et carte |
+| **Voir les favoris** | Page dédiée `/favorites` avec liste et carte |
 | **Déplacer vers projet** | Associer un favori à un projet existant |
 
 ### Données
@@ -299,7 +299,7 @@ L'utilisateur peut sauvegarder des biens en favoris sans les associer à un proj
 | user_id | UUID | Utilisateur (null si déconnecté) |
 | target_type | ENUM | terrain / bien (aligné sur scores.target_type) |
 | target_id | UUID | FK vers terrains ou biens |
-| projet_id | UUID | Projet associé (optionnel) |
+| project_id | UUID | Projet associé (optionnel) |
 | created_at | TIMESTAMPTZ | Date d'ajout |
 | notes | TEXT | Note personnelle (optionnel) |
 
@@ -335,10 +335,10 @@ L'utilisateur peut sauvegarder des biens en favoris sans les associer à un proj
 
 | Type | Description | URL |
 |---|---|---|
-| **Projet** | Partager les critères + résultats | `/partage/projet/[token]` |
-| **Annonce** | Partager une fiche bien | `/annonce/[id]` |
-| **Comparatif** | Partager une sélection de biens | `/partage/compare/[token]` |
-| **Carte** | Partager une vue carte avec filtres | `/partage/carte/[token]` |
+| **Project** | Partager les critères + résultats | `/share/project/[token]` |
+| **Listing** | Partager une fiche bien | `/listing/[id]` |
+| **Comparison** | Partager une sélection de biens | `/share/comparison/[token]` |
+| **Map** | Partager une vue carte avec filtres | `/share/map/[token]` |
 
 ### Mécanique
 

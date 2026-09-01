@@ -60,11 +60,11 @@ L'utilisateur peut dessiner plusieurs zones avec des niveaux de priorité diffé
 
 | Priorité | Couleur | Usage |
 |---|---|---|
-| 🔴 Haute | Rouge | Zone idéale, je cherche ici en priorité |
-| 🟠 Moyenne | Orange | Zone intéressante, à considérer |
-| 🟢 Basse | Vert | Zone de repli, si rien d'autre |
+| 🔴 High | Rouge | Zone idéale, je cherche ici en priorité |
+| 🟠 Medium | Orange | Zone intéressante, à considérer |
+| 🟢 Low | Vert | Zone de repli, si rien d'autre |
 
-Stockage : table `zones_priorite` (modèle wave-01 §13).
+Stockage : table `priority_zones` (modèle wave-01 §13).
 
 **Exemple** : Je veux acheter dans Lyon 3e en priorité (rouge), mais Lyon 6e et 7e sont acceptables (orange). Villeurbanne c'est OK si le prix est intéressant (vert).
 
@@ -96,5 +96,5 @@ Le total des poids doit toujours valoir 100%. Quand l'utilisateur modifie un sli
 - Sliders interactifs avec pourcentage affiché
 - Réinitialiser aux poids par défaut
 - Sauvegarder des profils de pondération personnalisés
-- Stockage : table `profils_ponderation` (modèle wave-01 §13).
+- Stockage : table `weighting_profiles` (modèle wave-01 §13).
 - Aperçu en temps réel sur la carte (les scores changent quand on bouge les sliders)

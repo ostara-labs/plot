@@ -12,13 +12,13 @@
 
 | Type | Canal | Description | Valeur enum |
 |---|---|---|---|
-| **Nouvelle offre** | Email + Push + In-app | Nouveau bien correspondant au projet | nouvelle_offre |
-| **Mise à jour offre** | In-app | Prix changé, photos ajoutées | mise_a_jour |
-| **Annonce vendue/louée** | Email + In-app | Le bien d'un favori a été vendu/loué | annonce_statut |
-| **Signalement** | Email + In-app | Votre annonce a été signalée | signalement |
+| **Nouvelle offre** | Email + Push + In-app | Nouveau bien correspondant au projet | new_offer |
+| **Mise à jour offre** | In-app | Prix changé, photos ajoutées | update |
+| **Annonce vendue/louée** | Email + In-app | Le bien d'un favori a été vendu/loué | listing_status |
+| **Signalement** | Email + In-app | Votre annonce a été signalée | report |
 | **Réponse contact** | Email + In-app | Un vendeur a répondu à votre message | contact |
-| **Compte** | Email | Vérification, reset MDP, bienvenue | compte |
-| **Récap hebdo** | Email | Résumé des nouvelles offres de vos projets | recap_hebdo |
+| **Compte** | Email | Vérification, reset MDP, bienvenue | account |
+| **Récap hebdo** | Email | Résumé des nouvelles offres de vos projets | weekly_digest |
 
 ### Fréquence (configurable par l'utilisateur)
 
@@ -70,11 +70,11 @@
 |---|---|---|
 | id | UUID | PK |
 | user_id | UUID | FK users |
-| type | ENUM | nouvelle_offre / mise_a_jour / annonce_statut / signalement / contact / compte / recap_hebdo (canonique : wave-01 §13) |
-| titre | TEXT | Titre court |
+| type | ENUM | new_offer / update / listing_status / report / contact / account / weekly_digest (canonique : wave-01 §13) |
+| title | TEXT | Titre court |
 | message | TEXT | Description |
-| lien | TEXT | URL de destination |
-| lu | BOOLEAN | Notification lue |
+| link | TEXT | URL de destination |
+| is_read | BOOLEAN | Notification lue |
 | created_at | TIMESTAMPTZ | |
 
 > Modèle canonique : table `notifications` définie dans wave-01 §13.

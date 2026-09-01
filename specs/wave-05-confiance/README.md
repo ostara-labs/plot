@@ -14,7 +14,7 @@ Un utilisateur (y compris déconnecté) peut signaler une annonce comme :
 |---|---|
 | **Vendu** | Propriétaire notifié, annonce marquée "vendu" si confirmé |
 | **Sous offre** | Propriétaire notifié, badge "sous offre" |
-| **Faux / arnaque** | Vérification manuelle, annonce passe en statut `signalée` (enum wave-01) |
+| **Faux / arnaque** | Vérification manuelle, annonce passe en statut `reported` (enum wave-01) |
 | **Erreur de prix** | Propriétaire notifié |
 | **Autre** | Message libre au propriétaire |
 

@@ -46,16 +46,16 @@ Une **annonce** est la fiche d'un bien (terrain, maison, app) mise en ligne sur 
 | Statut | Description |
 |---|---|
 | **active** | Visible sur la plateforme |
-| **sous_offre** | L'annonceur a indiqué que le bien est sous offre |
-| **vendu** | Le bien a été vendu |
-| **loué** | Le bien a été loué |
-| **désactivée** | L'annonceur a désactivé temporairement |
-| **supprimée** | L'annonceur a supprimé l'annonce |
-| **signalée** | Signalée par un utilisateur comme indisponible |
+| **under_offer** | L'annonceur a indiqué que le bien est sous offre |
+| **sold** | Le bien a été vendu |
+| **rented** | Le bien a été loué |
+| **disabled** | L'annonceur a désactivé temporairement |
+| **deleted** | L'annonceur a supprimé l'annonce |
+| **reported** | Signalée par un utilisateur comme indisponible |
 
 ### Droits selon le statut d'authentification
 
-| Action | Déconnecté | Connecté (particulier) | Annonceur (pro/perso) |
+| Action | Déconnecté | Connecté (individual) | Annonceur (pro/perso) |
 |---|---|---|---|
 | Rechercher / explorer la carte | ✅ | ✅ | ✅ |
 | Créer un projet (local) | ✅ | — | — |
@@ -128,7 +128,7 @@ Deux personas supplémentaires à intégrer dans une **future wave** (non spéci
 | **Bailleur** (landlord) | Gestion des bails, état des lieux, quittancement, suivi des loyers, fiscalité locative |
 | **Locataire** (tenant) | Recherche de location, état des lieux d'entrée/sortie, suivi des droits, quittances |
 
-Ces personas étendront le modèle `users` (actuellement `particulier` / `agence` / `notaire`) et ouvriront de nouveaux parcours, données et sous-produits. À murir dans une wave dédiée.
+Ces personas étendront le modèle `users` (actuellement `individual` / `agency` / `notary`) et ouvriront de nouveaux parcours, données et sous-produits. À murir dans une wave dédiée.
 
 ---
 
