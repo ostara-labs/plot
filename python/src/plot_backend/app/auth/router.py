@@ -101,8 +101,8 @@ def get_auth_router() -> APIRouter:
     ) -> dict[str, str]:
         settings = get_settings()
         try:
-            data = decode_jwt(body.refresh_token, settings.secret_key, [REFRESH_TOKEN_AUDIENCE])
-            user = await user_manager.get(user_manager.parse_id(data["sub"]))
+            claims = decode_jwt(body.refresh_token, settings.secret_key, [REFRESH_TOKEN_AUDIENCE])
+            user = await user_manager.get(user_manager.parse_id(claims["sub"]))
         except (jwt.PyJWTError, KeyError, exceptions.UserNotExists, exceptions.InvalidID):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="INVALID_REFRESH_TOKEN"
