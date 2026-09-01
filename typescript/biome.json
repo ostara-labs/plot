@@ -28,6 +28,20 @@
       "preset": "recommended",
       "suspicious": {
         "noExplicitAny": "warn"
+      },
+      "style": {
+        "useNamingConvention": {
+          "level": "error",
+          "options": {
+            "strictCase": false,
+            "conventions": [
+              {
+                "selector": { "kind": "objectLiteralProperty" },
+                "formats": ["camelCase", "snake_case"]
+              }
+            ]
+          }
+        }
       }
     }
   },
