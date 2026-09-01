@@ -1,4 +1,4 @@
-"""Engagement domain: feedback, contacts, favoris, partages, notifications."""
+"""Engagement domain: feedback, contacts, favorites, shares, notifications."""
 
 from datetime import datetime
 from uuid import UUID
@@ -12,7 +12,7 @@ from plot_backend.app.db.models.enums import (
     FeedbackStatus,
     FeedbackType,
     NotificationType,
-    PartageType,
+    ShareType,
     TargetType,
     enum_column,
 )
@@ -25,17 +25,17 @@ class Feedback(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, server_default=func.gen_random_uuid())
     user_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), index=True)
-    token_suivi: Mapped[str | None] = mapped_column(Text, index=True)
+    tracking_token: Mapped[str | None] = mapped_column(Text, index=True)
     type: Mapped[FeedbackType] = mapped_column(enum_column(FeedbackType, "feedback_type"))
     message: Mapped[str] = mapped_column(Text)
     page: Mapped[str | None] = mapped_column(Text)
     context: Mapped[dict | None] = mapped_column(JSONB)
     status: Mapped[FeedbackStatus] = mapped_column(
         enum_column(FeedbackStatus, "feedback_status"),
-        default=FeedbackStatus.nouveau,
-        server_default="nouveau",
+        default=FeedbackStatus.NEW,
+        server_default="new",
     )
-    reponse: Mapped[str | None] = mapped_column(Text)
+    response: Mapped[str | None] = mapped_column(Text)
     user_agent: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
@@ -49,35 +49,35 @@ class Contact(Base):
     __tablename__ = "contacts"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, server_default=func.gen_random_uuid())
-    annonce_id: Mapped[UUID] = mapped_column(ForeignKey("annonces.id"), index=True)
-    contacteur_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
+    listing_id: Mapped[UUID] = mapped_column(ForeignKey("listings.id"), index=True)
+    sender_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
     message: Mapped[str] = mapped_column(Text)
-    lu: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    is_read: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
-class Favori(Base):
-    """A favorited terrain or bien (wave-02, polymorphic target)."""
+class Favorite(Base):
+    """A favorited terrain or property (wave-02, polymorphic target)."""
 
-    __tablename__ = "favoris"
+    __tablename__ = "favorites"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, server_default=func.gen_random_uuid())
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
-    target_type: Mapped[TargetType] = mapped_column(enum_column(TargetType, "favori_target_type"))
+    target_type: Mapped[TargetType] = mapped_column(enum_column(TargetType, "favorite_target_type"))
     target_id: Mapped[UUID] = mapped_column(index=True)
-    projet_id: Mapped[UUID | None] = mapped_column(ForeignKey("projets.id"), index=True)
+    project_id: Mapped[UUID | None] = mapped_column(ForeignKey("projects.id"), index=True)
     notes: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
-class Partage(Base):
+class Share(Base):
     """A share link identified by a public token (wave-02)."""
 
-    __tablename__ = "partages"
+    __tablename__ = "shares"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, server_default=func.gen_random_uuid())
     token: Mapped[str] = mapped_column(Text, unique=True, index=True)
-    type: Mapped[PartageType] = mapped_column(enum_column(PartageType, "partage_type"))
+    type: Mapped[ShareType] = mapped_column(enum_column(ShareType, "share_type"))
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
     target_id: Mapped[UUID] = mapped_column()
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
@@ -95,8 +95,8 @@ class Notification(Base):
     type: Mapped[NotificationType] = mapped_column(
         enum_column(NotificationType, "notification_type")
     )
-    titre: Mapped[str] = mapped_column(Text)
+    title: Mapped[str] = mapped_column(Text)
     message: Mapped[str | None] = mapped_column(Text)
-    lien: Mapped[str | None] = mapped_column(Text)
-    lu: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    link: Mapped[str | None] = mapped_column(Text)
+    is_read: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

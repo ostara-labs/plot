@@ -5,30 +5,30 @@ from plot_backend.app.db.base import Base
 
 EXPECTED_TABLES = {
     "users",
-    "projets",
-    "zones_priorite",
-    "profils_ponderation",
+    "projects",
+    "priority_zones",
+    "weighting_profiles",
     "terrains",
-    "biens",
+    "properties",
     "scores",
-    "annonces",
-    "signalements",
+    "listings",
+    "reports",
     "claims",
     "feedback",
     "contacts",
-    "favoris",
-    "partages",
+    "favorites",
+    "shares",
     "notifications",
 }
 
-# (table, 4326 column, 2154 companion) per spec note 27.3.
+# (table, 4326 column, Lambert-93 companion) per spec note 27.3.
 GEOMETRY_PAIRS = [
-    ("projets", "zone", "zone_2154"),
-    ("projets", "zone_centre", "zone_centre_2154"),
-    ("zones_priorite", "geometry", "geometry_2154"),
-    ("terrains", "geometry", "geometry_2154"),
-    ("biens", "geometry", "geometry_2154"),
-    ("annonces", "geometry", "geometry_2154"),
+    ("projects", "zone", "zone_lambert_93"),
+    ("projects", "zone_center", "zone_center_lambert_93"),
+    ("priority_zones", "geometry", "geometry_lambert_93"),
+    ("terrains", "geometry", "geometry_lambert_93"),
+    ("properties", "geometry", "geometry_lambert_93"),
+    ("listings", "geometry", "geometry_lambert_93"),
 ]
 
 
@@ -36,7 +36,7 @@ def test_all_spec_tables_present():
     assert EXPECTED_TABLES <= set(Base.metadata.tables)
 
 
-def test_geometry_columns_have_2154_companions():
+def test_geometry_columns_have_lambert_93_companions():
     tables = Base.metadata.tables
     for table_name, geom_col, companion in GEOMETRY_PAIRS:
         table = tables[table_name]

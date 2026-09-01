@@ -1,4 +1,4 @@
-"""Project domain: ``projets``, ``zones_priorite``, ``profils_ponderation``."""
+"""Project domain: ``projects``, ``priority_zones``, ``weighting_profiles``."""
 
 from datetime import datetime
 from uuid import UUID
@@ -11,78 +11,78 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from plot_backend.app.db.base import Base
 from plot_backend.app.db.models.enums import (
-    Categorie,
-    ProjetType,
-    ZonePrioriteNiveau,
+    PriorityLevel,
+    ProjectCategory,
+    ProjectType,
     enum_column,
 )
 
 
-class Projet(Base):
+class Project(Base):
     """A saved search with its criteria (spec wave-01 §13)."""
 
-    __tablename__ = "projets"
+    __tablename__ = "projects"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, server_default=func.gen_random_uuid())
     user_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), index=True)
-    nom: Mapped[str] = mapped_column(Text)
-    type: Mapped[ProjetType] = mapped_column(enum_column(ProjetType, "projet_type"))
-    categorie: Mapped[Categorie] = mapped_column(enum_column(Categorie, "projet_categorie"))
-    criteres: Mapped[dict | None] = mapped_column(JSONB)
+    name: Mapped[str] = mapped_column(Text)
+    type: Mapped[ProjectType] = mapped_column(enum_column(ProjectType, "project_type"))
+    category: Mapped[ProjectCategory] = mapped_column(
+        enum_column(ProjectCategory, "project_category")
+    )
+    criteria: Mapped[dict | None] = mapped_column(JSONB)
     zone: Mapped[WKBElement | None] = mapped_column(
         Geometry(geometry_type="POLYGON", srid=4326, spatial_index=True)
     )
-    zone_2154: Mapped[WKBElement | None] = mapped_column(
+    zone_lambert_93: Mapped[WKBElement | None] = mapped_column(
         Geometry(geometry_type="POLYGON", srid=2154, spatial_index=True)
     )
-    zone_centre: Mapped[WKBElement | None] = mapped_column(
+    zone_center: Mapped[WKBElement | None] = mapped_column(
         Geometry(geometry_type="POINT", srid=4326, spatial_index=True)
     )
-    zone_centre_2154: Mapped[WKBElement | None] = mapped_column(
+    zone_center_lambert_93: Mapped[WKBElement | None] = mapped_column(
         Geometry(geometry_type="POINT", srid=2154, spatial_index=True)
     )
-    zone_rayon_km: Mapped[float | None] = mapped_column(Float, index=True)
-    budget_max: Mapped[float | None] = mapped_column(Float, index=True)
-    derniers_resultats: Mapped[dict | None] = mapped_column(JSONB)
-    nouvelles_offres: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
-    date_creation: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
-    date_derniere_consultation: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    date_mise_a_jour: Mapped[datetime] = mapped_column(
+    zone_radius_in_kilometers: Mapped[float | None] = mapped_column(Float, index=True)
+    max_budget: Mapped[float | None] = mapped_column(Float, index=True)
+    latest_results: Mapped[dict | None] = mapped_column(JSONB)
+    new_offers_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    last_viewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
 
-class ZonePriorite(Base):
+class PriorityZone(Base):
     """A priority zone drawn on the investment map (wave-04)."""
 
-    __tablename__ = "zones_priorite"
+    __tablename__ = "priority_zones"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, server_default=func.gen_random_uuid())
-    projet_id: Mapped[UUID] = mapped_column(ForeignKey("projets.id"), index=True)
-    niveau: Mapped[ZonePrioriteNiveau] = mapped_column(
-        enum_column(ZonePrioriteNiveau, "zone_priorite_niveau")
-    )
+    project_id: Mapped[UUID] = mapped_column(ForeignKey("projects.id"), index=True)
+    level: Mapped[PriorityLevel] = mapped_column(enum_column(PriorityLevel, "priority_level"))
     geometry: Mapped[WKBElement] = mapped_column(
         Geometry(geometry_type="POLYGON", srid=4326, spatial_index=True)
     )
-    geometry_2154: Mapped[WKBElement] = mapped_column(
+    geometry_lambert_93: Mapped[WKBElement] = mapped_column(
         Geometry(geometry_type="POLYGON", srid=2154, spatial_index=True)
     )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
-class ProfilPonderation(Base):
+class WeightingProfile(Base):
     """A saved weighting profile, reusable across projects (wave-04)."""
 
-    __tablename__ = "profils_ponderation"
+    __tablename__ = "weighting_profiles"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, server_default=func.gen_random_uuid())
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
-    nom: Mapped[str] = mapped_column(Text)
-    categorie: Mapped[Categorie] = mapped_column(enum_column(Categorie, "profil_categorie"))
-    poids: Mapped[dict] = mapped_column(JSONB)
+    name: Mapped[str] = mapped_column(Text)
+    category: Mapped[ProjectCategory] = mapped_column(
+        enum_column(ProjectCategory, "profile_category")
+    )
+    weights: Mapped[dict] = mapped_column(JSONB)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()

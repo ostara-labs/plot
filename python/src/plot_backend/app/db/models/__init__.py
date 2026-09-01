@@ -4,32 +4,32 @@ Every model is re-exported here; importing this module registers all tables
 on ``Base.metadata``.
 """
 
-from plot_backend.app.db.models.annonces import Annonce, Claim, Signalement
 from plot_backend.app.db.models.engagement import (
     Contact,
-    Favori,
+    Favorite,
     Feedback,
     Notification,
-    Partage,
+    Share,
 )
-from plot_backend.app.db.models.geodata import Bien, Score, Terrain
+from plot_backend.app.db.models.geodata import Property, Score, Terrain
 from plot_backend.app.db.models.identity import User
-from plot_backend.app.db.models.projets import ProfilPonderation, Projet, ZonePriorite
+from plot_backend.app.db.models.listings import Claim, Listing, Report
+from plot_backend.app.db.models.projects import PriorityZone, Project, WeightingProfile
 
 __all__ = [
-    "Annonce",
-    "Bien",
     "Claim",
     "Contact",
-    "Favori",
+    "Favorite",
     "Feedback",
+    "Listing",
     "Notification",
-    "Partage",
-    "ProfilPonderation",
-    "Projet",
+    "PriorityZone",
+    "Project",
+    "Property",
+    "Report",
     "Score",
-    "Signalement",
+    "Share",
     "Terrain",
     "User",
-    "ZonePriorite",
+    "WeightingProfile",
 ]

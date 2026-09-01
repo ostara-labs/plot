@@ -1,8 +1,9 @@
 """Shared enum types for the Plot data model.
 
-Each enum maps to a dedicated PostgreSQL native enum type (explicit ``name``
-avoids collisions). ``values_callable`` stores the member *value* (the exact
-string from the spec) rather than the member name.
+Every identifier is English (naming convention, decision 27.27): class names,
+member names and stored values alike. Each enum maps to a dedicated
+PostgreSQL native enum type (explicit ``name`` avoids collisions).
+``values_callable`` stores the member *value* rather than the member name.
 """
 
 import enum
@@ -16,136 +17,136 @@ def enum_values(enum_cls: type[enum.Enum]) -> list[str]:
 
 
 class UserType(enum.Enum):
-    particulier = "particulier"
-    agence = "agence"
-    notaire = "notaire"
+    INDIVIDUAL = "individual"
+    AGENCY = "agency"
+    NOTARY = "notary"
 
 
 class UserRole(enum.Enum):
-    user = "user"
-    moderateur = "moderateur"
-    admin = "admin"
+    USER = "user"
+    MODERATOR = "moderator"
+    ADMIN = "admin"
 
 
-class ProjetType(enum.Enum):
-    logement = "logement"
-    investissement = "investissement"
+class ProjectType(enum.Enum):
+    HOUSING = "housing"
+    INVESTMENT = "investment"
 
 
-class Categorie(enum.Enum):
-    terrain_terre = "terrain-terre"
-    terrain_classique = "terrain-classique"
-    maison = "maison"
-    appartement = "appartement"
+class ProjectCategory(enum.Enum):
+    BURIED_TERRAIN = "buried-terrain"
+    CLASSIC_TERRAIN = "classic-terrain"
+    HOUSE = "house"
+    APARTMENT = "apartment"
 
 
-class ZonePrioriteNiveau(enum.Enum):
-    haute = "haute"
-    moyenne = "moyenne"
-    basse = "basse"
+class PriorityLevel(enum.Enum):
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
 
 
 class TerrainZone(enum.Enum):
-    urbain = "urbain"
-    periurbain = "periurbain"
-    rural = "rural"
+    URBAN = "urban"
+    PERIURBAN = "periurban"
+    RURAL = "rural"
 
 
-class BienType(enum.Enum):
-    maison = "maison"
-    appartement = "appartement"
+class PropertyType(enum.Enum):
+    HOUSE = "house"
+    APARTMENT = "apartment"
 
 
 class TargetType(enum.Enum):
-    terrain = "terrain"
-    bien = "bien"
+    TERRAIN = "terrain"
+    PROPERTY = "property"
 
 
-class AnnonceType(enum.Enum):
-    terrain = "terrain"
-    maison = "maison"
-    appartement = "appartement"
+class ListingType(enum.Enum):
+    TERRAIN = "terrain"
+    HOUSE = "house"
+    APARTMENT = "apartment"
 
 
-class AnnonceStatut(enum.Enum):
-    active = "active"
-    sous_offre = "sous_offre"
-    vendu = "vendu"
-    loue = "loué"
-    archivee = "archivée"
-    desactivee = "désactivée"
-    supprimee = "supprimée"
-    signalee = "signalée"
+class ListingStatus(enum.Enum):
+    ACTIVE = "active"
+    UNDER_OFFER = "under_offer"
+    SOLD = "sold"
+    RENTED = "rented"
+    ARCHIVED = "archived"
+    DISABLED = "disabled"
+    DELETED = "deleted"
+    REPORTED = "reported"
 
 
-class AnnonceSource(enum.Enum):
-    manuel = "manuel"
-    import_ = "import"
-    claim = "claim"
+class ListingSource(enum.Enum):
+    MANUAL = "manual"
+    IMPORT = "import"
+    CLAIM = "claim"
 
 
-class AnnonceClaimStatus(enum.Enum):
-    none = "none"
-    pending = "pending"
-    approved = "approved"
-    rejected = "rejected"
+class ListingClaimStatus(enum.Enum):
+    NONE = "none"
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
 
 
-class SignalementType(enum.Enum):
-    vendu = "vendu"
-    sous_offre = "sous_offre"
-    faux = "faux"
-    erreur_prix = "erreur_prix"
-    autre = "autre"
+class ReportType(enum.Enum):
+    SOLD = "sold"
+    UNDER_OFFER = "under_offer"
+    FRAUD = "fraud"
+    PRICE_ERROR = "price_error"
+    OTHER = "other"
 
 
-class SignalementStatut(enum.Enum):
-    en_attente = "en_attente"
-    traite = "traite"
-    rejete = "rejeté"
+class ReportStatus(enum.Enum):
+    PENDING = "pending"
+    PROCESSED = "processed"
+    REJECTED = "rejected"
 
 
 class ClaimType(enum.Enum):
-    proprietaire = "proprietaire"
-    mandataire = "mandataire"
-    agence = "agence"
-    notaire = "notaire"
+    OWNER = "owner"
+    AGENT = "agent"
+    AGENCY = "agency"
+    NOTARY = "notary"
 
 
 class ClaimStatus(enum.Enum):
-    pending = "pending"
-    approved = "approved"
-    rejected = "rejected"
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
 
 
 class FeedbackType(enum.Enum):
-    bug = "bug"
-    idee = "idee"
-    question = "question"
-    doleance = "doléance"
+    BUG = "bug"
+    IDEA = "idea"
+    QUESTION = "question"
+    COMPLAINT = "complaint"
 
 
 class FeedbackStatus(enum.Enum):
-    nouveau = "nouveau"
-    en_cours = "en_cours"
-    traite = "traite"
-    archive = "archive"
+    NEW = "new"
+    IN_PROGRESS = "in_progress"
+    PROCESSED = "processed"
+    ARCHIVED = "archived"
 
 
-class PartageType(enum.Enum):
-    projet = "projet"
-    compare = "compare"
-    carte = "carte"
+class ShareType(enum.Enum):
+    PROJECT = "project"
+    COMPARISON = "comparison"
+    MAP = "map"
 
 
 class NotificationType(enum.Enum):
-    nouvelle_offre = "nouvelle_offre"
-    mise_a_jour = "mise_a_jour"
-    annonce_statut = "annonce_statut"
-    signalement = "signalement"
-    contact = "contact"
-    compte = "compte"
-    recap_hebdo = "recap_hebdo"
+    NEW_OFFER = "new_offer"
+    UPDATE = "update"
+    LISTING_STATUS = "listing_status"
+    REPORT = "report"
+    CONTACT = "contact"
+    ACCOUNT = "account"
+    WEEKLY_DIGEST = "weekly_digest"
 
 
 def enum_column(enum_cls: type[enum.Enum], name: str) -> SAEnum:
