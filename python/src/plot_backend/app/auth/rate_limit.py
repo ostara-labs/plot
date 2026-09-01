@@ -44,11 +44,17 @@ def _ip_key(ip: str) -> str:
 
 
 async def _attempt_allowed(redis: Redis, key: str) -> bool:
-    """INCR + EXPIRE on first hit; True while the counter is within the cap."""
-    count = await redis.incr(key)
-    if count == 1:
-        await redis.expire(key, RATE_LIMIT_WINDOW_SECONDS)
-    return count <= RATE_LIMIT_MAX_ATTEMPTS
+    """Atomic INCR + EXPIRE(NX); True while the counter is within the cap.
+
+    The pipeline makes the counter and its TTL one atomic operation: with a
+    separate ``expire`` a failure between the two would leave a key without
+    TTL that no later attempt re-expires — a permanent block.
+    """
+    async with redis.pipeline(transaction=True) as pipe:
+        pipe.incr(key)
+        pipe.expire(key, RATE_LIMIT_WINDOW_SECONDS, nx=True)
+        count, _ = await pipe.execute()
+    return int(count) <= RATE_LIMIT_MAX_ATTEMPTS
 
 
 async def login_rate_limit(
@@ -56,7 +62,14 @@ async def login_rate_limit(
     credentials: Annotated[OAuth2PasswordRequestForm, Depends()],
     redis: Annotated[Redis, Depends(get_redis)],
 ) -> None:
-    """Reject login attempts beyond 5/15min per email and per IP (429)."""
+    """Reject login attempts beyond 5/15min per email and per IP (429).
+
+    NOTE (deployment): behind a reverse proxy, run uvicorn with
+    ``--proxy-headers --forwarded-allow-ips="<proxy>"`` so
+    ``request.client.host`` is the real client IP — otherwise every user
+    behind the proxy shares one IP counter. Never trust forwarded headers
+    from untrusted clients.
+    """
     ip = request.client.host if request.client is not None else "unknown"
     for key in (_email_key(credentials.username), _ip_key(ip)):
         try:

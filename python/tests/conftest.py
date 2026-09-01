@@ -3,10 +3,12 @@
 ``PLOT_DATABASE_URL`` is pointed at ``plot_test`` at import time so the app
 engine (created lazily on first use) targets the test database. The
 session-scoped ``migrated_test_db`` fixture creates the database and applies
-Alembic migrations once per run.
+Alembic migrations once per run. Tests are skipped when PostgreSQL is
+unreachable (CI currently provides no postgres service).
 """
 
 import os
+import socket
 import subprocess
 from pathlib import Path
 
@@ -17,29 +19,47 @@ from redis.asyncio import Redis
 
 TEST_DB_NAME = "plot_test"
 TEST_DATABASE_URL = f"postgresql+asyncpg://plot:plot@localhost:5432/{TEST_DB_NAME}"
+TEST_REDIS_URL = "redis://localhost:6379/15"
 
 # Point the app at the test database before any app import.
 os.environ["PLOT_DATABASE_URL"] = TEST_DATABASE_URL
+os.environ["PLOT_REDIS_URL"] = TEST_REDIS_URL
 
 PYTHON_DIR = Path(__file__).resolve().parents[1]
+
+
+def _postgres_reachable() -> bool:
+    """True when something accepts TCP connections on localhost:5432."""
+    with socket.socket() as sock:
+        sock.settimeout(2)
+        return sock.connect_ex(("127.0.0.1", 5432)) == 0
 
 
 @pytest.fixture(scope="session")
 def migrated_test_db() -> str:
     """Create ``plot_test`` and apply Alembic migrations (once per session)."""
+    if not _postgres_reachable():
+        pytest.skip(
+            "PostgreSQL unreachable on localhost:5432 — auth integration "
+            "tests need the dev docker stack (docker compose -f "
+            "docker-compose.dev.yml up -d)"
+        )
     subprocess.run(
         ["docker", "exec", "carto-postgres-1", "createdb", "-U", "plot", TEST_DB_NAME],
         check=False,
         capture_output=True,
     )
     env = {**os.environ, "PLOT_DATABASE_URL": TEST_DATABASE_URL}
-    subprocess.run(
-        ["uv", "run", "alembic", "upgrade", "head"],
-        check=True,
-        env=env,
-        cwd=PYTHON_DIR,
-        capture_output=True,
-    )
+    try:
+        subprocess.run(
+            ["uv", "run", "alembic", "upgrade", "head"],
+            check=True,
+            env=env,
+            cwd=PYTHON_DIR,
+            capture_output=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        pytest.fail(f"alembic upgrade head failed on plot_test: {exc.stderr}")
     return TEST_DATABASE_URL
 
 
@@ -59,8 +79,8 @@ async def _dispose_engine() -> None:
 
 @pytest_asyncio.fixture
 async def redis_client() -> Redis:
-    """Fresh, flushed Redis client — injectable via dependency override."""
-    client = Redis.from_url("redis://localhost:6379/0", decode_responses=True)
+    """Fresh Redis client on the dedicated test DB (15) — DB 0 stays dev-only."""
+    client = Redis.from_url(TEST_REDIS_URL, decode_responses=True)
     await client.flushdb()
     yield client
     await client.flushdb()
