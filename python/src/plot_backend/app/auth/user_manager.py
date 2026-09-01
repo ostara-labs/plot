@@ -28,12 +28,23 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, UUID]):
     async def on_after_forgot_password(
         self, user: User, token: str, request: Request | None = None
     ) -> None:
-        logger.info("User %s requested a password reset (token issued)", user.id)
+        self._dev_mail_sink("password reset", user, token)
 
     async def on_after_request_verify(
         self, user: User, token: str, request: Request | None = None
     ) -> None:
-        logger.info("User %s requested email verification (token issued)", user.id)
+        self._dev_mail_sink("email verification", user, token)
+
+    def _dev_mail_sink(self, action: str, user: User, token: str) -> None:
+        """Log the token while no mail provider is configured (dev sink).
+
+        Postmark delivery arrives in wave-07; once ``PLOT_POSTMARK_API_KEY``
+        is set the token is no longer written to logs.
+        """
+        if get_settings().postmark_api_key is None:
+            logger.warning("DEV MAIL SINK — %s token for %s: %s", action, user.email, token)
+        else:
+            logger.info("%s requested for %s (delivery: wave-07)", action, user.email)
 
     async def on_after_login(
         self, user: User, request: Request | None = None, response=None
