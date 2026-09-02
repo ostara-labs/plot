@@ -414,5 +414,7 @@ def downgrade() -> None:
         "notification_type",
         "favorite_target_type",
     ):
-        op.execute(f"DROP TYPE {enum_type}")
+        # IF EXISTS: a replayed or partially applied downgrade must not abort
+        # on an enum type that is already gone.
+        op.execute(f"DROP TYPE IF EXISTS {enum_type}")
     # ### end Alembic commands ###
