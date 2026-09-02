@@ -23,7 +23,7 @@ jobs:
       - name: Check Conventional Commits title
         env:
           TITLE: ${{ github.event.pull_request.title }}
-          ACTOR: ${{ github.actor }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
           set -euo pipefail
           pattern='^(Merge |Revert |fixup! )|^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9_./-]+\))?(!)?: .{1,}$'
@@ -31,19 +31,30 @@ jobs:
           # 100-char cap ("chore(deps): bump X from A to B in the
           # minor-and-patch group"). The Conventional Commits pattern still
           # applies to them; only the length cap is waived.
-          if [ "$ACTOR" = "dependabot[bot]" ]; then
+          #
+          # Dependabot is identified by the immutable PR author, not
+          # github.actor: the actor is whoever triggered the run, so a human
+          # pushing to a Dependabot branch or re-running the job would
+          # re-enable the cap on a machine-generated title.
+          if [ "$PR_AUTHOR" = "dependabot[bot]" ]; then
             length_ok=1
           else
             if [ ${#TITLE} -le 100 ]; then length_ok=1; else length_ok=0; fi
           fi
-          if [ "$length_ok" -eq 1 ] && echo "$TITLE" | grep -qE "$pattern"; then
-            echo "title ok: $TITLE"
-          else
-            echo "PR title must follow Conventional Commits (and stay under 100 chars):" >&2
+          # Separate failures, separate messages: the reviewer must see which
+          # rule actually failed (the length cap does not apply to
+          # Dependabot, so the message must not cite it there).
+          if [ "$length_ok" -eq 0 ]; then
+            echo "PR title must stay under 100 characters (got ${#TITLE}):" >&2
+            exit 1
+          fi
+          if ! echo "$TITLE" | grep -qE "$pattern"; then
+            echo "PR title must follow Conventional Commits:" >&2
             echo "  type(scope)!: subject   e.g. 'feat(rust): add retry loop'" >&2
             echo "  types: feat fix docs style refactor perf test build ci chore revert" >&2
             exit 1
           fi
+          echo "title ok: $TITLE"
 
   size:
     name: size
