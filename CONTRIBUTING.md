@@ -32,8 +32,10 @@ Install only the toolchains for the stacks you keep:
    existing clone) — the shared Makefiles live in `.devtools/`.
 3. Install dependencies and hooks: `make deps && make hooks`.
 4. For backend work, start the stack and apply migrations:
-   `make db-up && make migrate` (then `make api` for the dev server).
+   `make db-up && make migrate`.
 5. Run the full gate: `make ci`.
+6. When you need the dev server, run `make api` in a separate terminal
+   (it stays in the foreground until interrupted).
 
 ## Commit convention
 
