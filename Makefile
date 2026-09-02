@@ -26,3 +26,33 @@ ci: lint test ## Run lint + test (CI gate)
 clean: clean-rust clean-typescript clean-elixir clean-python ## Clean build artifacts in all present stacks
 
 .PHONY: format deps lint test build ci clean
+
+##@ Project
+
+# Project-level targets: the daily backend loop (dev stack, migrations, API).
+# Stack-agnostic targets stay in the devtools submodule above.
+
+db-up: ## Start the local dev stack (PostGIS + Redis, docker compose)
+	docker compose -f docker-compose.dev.yml up -d --wait
+
+db-down: ## Stop the local dev stack (keeps volumes)
+	docker compose -f docker-compose.dev.yml down
+
+migrate: ## Apply database migrations to head (Alembic)
+	cd $(PY_DIR) && uv run alembic upgrade head
+
+migrate-down: ## Roll back migrations (default one step; more: make migrate-down steps=2)
+	cd $(PY_DIR) && uv run alembic downgrade $(steps)
+
+migration: ## Autogenerate a migration from models: make migration m="add listings table"
+	@if [ -z "$(m)" ]; then \
+		echo 'usage: make migration m="describe the schema change"'; \
+		exit 1; \
+	fi
+	cd $(PY_DIR) && uv run alembic revision --autogenerate -m "$(m)"
+
+api: ## Run the FastAPI dev server (uvicorn, auto-reload)
+	cd $(PY_DIR) && uv run uvicorn plot_backend.app.main:app --reload
+
+steps ?= -1
+.PHONY: db-up db-down migrate migrate-down migration api

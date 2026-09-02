@@ -10,7 +10,7 @@ updating its row here in the same PR.
 
 | Path | Purpose |
 |---|---|
-| Makefile | Entrypoint; canonical targets (help, hooks, format, lint, test, build, ci, clean) |
+| Makefile | Entrypoint; canonical targets (help, hooks, format, lint, test, build, ci, clean) + project targets (db-up, migrate, api, ...) |
 | .pre-commit-config.yaml | Local hooks: hygiene, gitleaks, conventional commits, no-commit-to-main |
 | .editorconfig | Editor defaults (LF, indentation) |
 | .gitattributes | Line endings, linguist hints |

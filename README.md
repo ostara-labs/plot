@@ -43,6 +43,12 @@ Backend: FastAPI + geopandas/shapely + PostGIS.
 | `make ci` | `lint` + `test` — the full local gate |
 | `make clean` | Remove build artifacts |
 | `make lint-typescript` | One stack only (`-typescript`, `-python` also available) |
+| `make db-up` | Start the local dev stack (PostGIS + Redis) |
+| `make db-down` | Stop the local dev stack (keeps volumes) |
+| `make migrate` | Apply database migrations (Alembic) |
+| `make migrate-down` | Roll back one migration (`steps=N` for more) |
+| `make migration m="..."` | Autogenerate a migration from the models |
+| `make api` | Run the FastAPI dev server (auto-reload) |
 
 Absent stacks print `[target] skipped (no <marker>)` and are ignored.
 
