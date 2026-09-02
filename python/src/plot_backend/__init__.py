@@ -1,7 +1,3 @@
-"""Placeholder package - rename me."""
+"""Plot backend package."""
 
-__all__ = ["greet"]
-
-
-def greet(name: str) -> str:
-    return f"Hello, {name}!"
+__version__ = "0.2.0"

@@ -1,9 +1,9 @@
 # Plot (carto)
 
 Find the best terrain/parcel to build or invest in France. Two modes:
-**Logement principal** (terrain pour maison enterrée, terrain classique,
-maison, appartement) and **Investissement locatif** (maison, appartement,
-terrain) — each with its own criteria, scoring weights, and data sources.
+**Primary residence** (buried house lot, standard lot,
+house, apartment) and **Rental investment** (house, apartment,
+lot) — each with its own criteria, scoring weights, and data sources.
 
 Multi-language monorepo: TypeScript frontend + Python backend behind one GNU
 Make entrypoint, built from the [ostara-labs repo-template](https://github.com/ostara-labs/repo-template).
@@ -43,6 +43,12 @@ Backend: FastAPI + geopandas/shapely + PostGIS.
 | `make ci` | `lint` + `test` — the full local gate |
 | `make clean` | Remove build artifacts |
 | `make lint-typescript` | One stack only (`-typescript`, `-python` also available) |
+| `make db-up` | Start the local dev stack (PostGIS + Redis) |
+| `make db-down` | Stop the local dev stack (keeps volumes) |
+| `make migrate` | Apply database migrations (Alembic) |
+| `make migrate-down` | Roll back one migration (`steps=N` for more) |
+| `make migration m="..."` | Autogenerate a migration from the models |
+| `make api` | Run the FastAPI dev server (auto-reload) |
 
 Absent stacks print `[target] skipped (no <marker>)` and are ignored.
 

@@ -27,7 +27,7 @@ Questions à instruire avant d'écrire la spec :
 
 ## Liens
 
-- wave-01 : `signalements.statut` (en_attente/traite/rejeté), `users.bloque`, 27.25
+- wave-01 : `reports.status` (pending/processed/rejected), `users.is_blocked`, 27.25
 - wave-05 : escalade automatique, score de fiabilité
 - wave-08 : backoffice, modération annonces/signalements
 - wave-03 : claims (vérification manuelle « ou auto si possible » — même famille de questions)

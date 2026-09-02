@@ -21,7 +21,7 @@ wave-03 (contact vendeur) référence un « dashboard » du vendeur et wave-05 r
 
 ## Liens
 
-- wave-01 : modèle (`contacts`, `users.score_fiabilite`, 27.23)
+- wave-01 : modèle (`contacts`, `users.reliability_score`, 27.23)
 - wave-03 : dépôt d'annonce, contact vendeur
 - wave-05 : score de fiabilité
 - wave-07 : notifications annonceur (signalement, contact, réponse)

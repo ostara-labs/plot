@@ -19,7 +19,7 @@
 | Rôle | Permissions |
 |---|---|
 | **User** | Accès standard |
-| **Modérateur** | Gérer signalements, modérer annonces |
+| **Moderator** | Gérer reports, modérer listings |
 | **Admin** | Tout + gérer users + config |
 
 > Rôles stockés dans la colonne `users.role` — modèle wave-01 §13.
@@ -73,7 +73,7 @@
 |---|---|
 | Avatar | Photo |
 | Nom / Email | Identité |
-| Type | particulier / agence / notaire |
+| Type | individual / agency / notary |
 | Score fiabilité | 0-100 |
 | Annonces | Nombre |
 | Inscrit le | Date |
@@ -93,9 +93,9 @@
 
 | Action | Description |
 |---|---|
-| **Bloquer** | Désactiver le compte (récupérable) — colonne `users.bloque` |
+| **Bloquer** | Bloquer le compte pour modération (récupérable) — colonne `users.is_blocked` : masque les contenus mais **n'empêche pas le login** ; la désactivation complète passe par `is_active` |
 | **Supprimer** | Suppression définitive admin (hard delete — distinct de la suppression propriétaire qui reste récupérable 30 j) + données |
-| **Changer le rôle** | User ↔ Modérateur ↔ Admin |
+| **Changer le rôle** | User ↔ Moderator ↔ Admin |
 | **Reset score** | Remettre le score de fiabilité à 50 |
 | **Vérifier** | Marquer email comme vérifié manuellement |
 
@@ -107,9 +107,9 @@
 
 | Filtre | Description |
 |---|---|
-| Statut | active / sous_offre / vendu / signalée |
-| Type | terrain / maison / appartement |
-| Source | manuel / import / claim (enum canonique wave-01) |
+| Statut | active / under_offer / sold / reported |
+| Type | terrain / house / apartment |
+| Source | manual / import / claim (enum canonique wave-01) |
 | Date | Période |
 | Signalée | Oui / Non |
 
@@ -133,9 +133,9 @@
 |---|---|
 | Annonce | Bien signalé |
 | Signalé par | Utilisateur (anonyme si déconnecté) |
-| Raison | dropdown (vendu, sous_offre, faux, erreur_prix, autre) |
+| Raison | dropdown (sold, under_offer, fraud, price_error, other) |
 | Date | Quand |
-| Statut | en_attente / traité / rejeté |
+| Statut | pending / processed / rejected |
 | Actions | Traiter / Rejeter |
 
 ### Actions
@@ -155,12 +155,12 @@
 
 | Colonne | Description |
 |---|---|
-| Type | 🐛 bug / 💡 idée / ❓ question / 😤 doléance |
+| Type | 🐛 bug / 💡 idea / ❓ question / 😤 complaint |
 | Message | Contenu tronqué |
 | Page | Page courante |
 | Utilisateur | Si connecté |
 | Date | Quand |
-| Statut | nouveau / en_cours / traite / archive (enum canonique wave-01) |
+| Statut | new / in_progress / processed / archived (enum canonique wave-01) |
 | Actions | Répondre / Résoudre / Fermer |
 
 ### Actions

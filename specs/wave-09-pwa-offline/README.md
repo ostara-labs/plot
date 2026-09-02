@@ -103,9 +103,9 @@ Install → Activate → Fetch (intercept)
 
 | Opération | File d'attente | Priorité |
 |---|---|---|
-| Favori ajouté | `sync_favoris` | Haute |
-| Signalement | `sync_signalements` | Haute |
-| Projet créé | `sync_projets` | Moyenne |
+| Favori ajouté | `sync_favorites` | Haute |
+| Signalement | `sync_reports` | Haute |
+| Projet créé | `sync_projects` | Moyenne |
 | Feedback | `sync_feedback` | Basse |
 
 Le service worker tente la sync à chaque retour en ligne via la **Background Sync API**. Si échec, réessaie avec backoff exponentiel.

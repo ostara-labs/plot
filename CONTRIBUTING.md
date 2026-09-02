@@ -31,7 +31,11 @@ Install only the toolchains for the stacks you keep:
 2. Clone with submodules (or run `git submodule update --init` in an
    existing clone) — the shared Makefiles live in `.devtools/`.
 3. Install dependencies and hooks: `make deps && make hooks`.
-4. Run the full gate: `make ci`.
+4. For backend work, start the stack and apply migrations:
+   `make db-up && make migrate`.
+5. Run the full gate: `make ci`.
+6. When you need the dev server, run `make api` in a separate terminal
+   (it stays in the foreground until interrupted).
 
 ## Commit convention
 
