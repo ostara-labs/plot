@@ -1,0 +1,45 @@
+# Docs-drift map — enforced by the docs-drift CI check (engine lives in
+# the .devtools submodule, wired in .github/workflows/ci.yml). A rule
+# says: when code matching `paths` changes, at least one of `docs` must
+# change in the same PR. Deliberate bypass: the `no-docs` label (the
+# bypass is posted loudly as a PR comment — never silent).
+#
+# A mapped doc that does not exist blocks the PR as MISSING: create it.
+# Editing this map does NOT satisfy a MISSING finding.
+
+rules:
+  - name: data model
+    paths: ["python/src/plot_backend/app/db/models/**"]
+    docs:
+      - docs/domain/entity-relationships.md
+      - docs/domain/glossary.md
+
+  - name: authentication
+    paths: ["python/src/plot_backend/app/auth/**"]
+    docs:
+      - docs/domain/deep-dives/authentication.md
+      - docs/processes/login-flow.md
+
+  - name: api surface
+    paths:
+      - "python/src/plot_backend/app/main.py"
+      - "python/src/plot_backend/app/**/router*.py"
+    docs:
+      - docs/processes/login-flow.md
+
+  - name: scoring
+    paths: ["python/src/plot_backend/app/scoring/**"]
+    docs:
+      - docs/domain/business-rules.md
+
+  - name: frontend components
+    paths: ["typescript/src/**"]
+    docs:
+      - docs/processes/frontend-dev.md
+
+# Paths that never trigger the check.
+exempt:
+  - "**/tests/**"
+  - "**/*.test.*"
+  - "**/__pycache__/**"
+  - "**/__snapshots__/**"
