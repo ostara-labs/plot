@@ -10,7 +10,7 @@ GL JS, Paraglide (inlang) for i18n, Vitest, Biome, pnpm.
 | Directory | Produced by | Regenerate with |
 |---|---|---|
 | `typescript/.svelte-kit/` | SvelteKit codegen | `pnpm dev` / `pnpm build` / `svelte-kit sync` |
-| `typescript/src/lib/paraglide/` | Paraglide compiler | `pnpm pretypecheck` (runs on typecheck, dev, build) |
+| `typescript/src/lib/paraglide/` | Paraglide compiler | `pnpm pretypecheck` (runs on `pnpm typecheck` — pnpm executes `pre*` hooks by default) and the Paraglide Vite plugin (compiles on every `pnpm dev` / `pnpm build`) |
 | `typescript/project.inlang/cache/` | inlang tooling | any paraglide command |
 
 `src/lib/paraglide/` carries its own nested `.gitignore` (it ignores its
