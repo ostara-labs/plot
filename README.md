@@ -24,7 +24,7 @@ Backend: FastAPI + geopandas/shapely + PostGIS.
 
 ## Quickstart
 
-1. Install pre-commit + the toolchains for both stacks (see CONTRIBUTING.md).
+1. Install the toolchains for both stacks (see CONTRIBUTING.md).
 2. Clone with submodules (or `git submodule update --init`).
 3. `make deps && make hooks`
 4. `make ci`
@@ -34,7 +34,7 @@ Backend: FastAPI + geopandas/shapely + PostGIS.
 | Target | What it does |
 |---|---|
 | `make help` | List all targets |
-| `make hooks` | Install pre-commit hooks |
+| `make hooks` | Activate the devtools git hooks |
 | `make deps` | Install dependencies in all present stacks |
 | `make format` | Format all present stacks |
 | `make lint` | Lint all present stacks |
