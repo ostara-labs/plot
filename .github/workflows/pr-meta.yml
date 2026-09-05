@@ -23,45 +23,24 @@ jobs:
       - name: Check Conventional Commits title
         env:
           TITLE: ${{ github.event.pull_request.title }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
           set -euo pipefail
           pattern='^(Merge |Revert |fixup! )|^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9_./-]+\))?(!)?: .{1,}$'
-          # Dependabot titles are machine-generated and routinely exceed the
-          # 100-char cap ("chore(deps): bump X from A to B in the
-          # minor-and-patch group"). The Conventional Commits pattern still
-          # applies to them; only the length cap is waived.
-          #
-          # Dependabot is identified by the immutable PR author, not
-          # github.actor: the actor is whoever triggered the run, so a human
-          # pushing to a Dependabot branch or re-running the job would
-          # re-enable the cap on a machine-generated title.
-          if [ "$PR_AUTHOR" = "dependabot[bot]" ]; then
-            length_ok=1
+          if [ ${#TITLE} -le 100 ] && echo "$TITLE" | grep -qE "$pattern"; then
+            echo "title ok: $TITLE"
           else
-            if [ ${#TITLE} -le 100 ]; then length_ok=1; else length_ok=0; fi
-          fi
-          # Separate failures, separate messages: the reviewer must see which
-          # rule actually failed (the length cap does not apply to
-          # Dependabot, so the message must not cite it there).
-          if [ "$length_ok" -eq 0 ]; then
-            echo "PR title must stay under 100 characters (got ${#TITLE}):" >&2
-            exit 1
-          fi
-          if ! echo "$TITLE" | grep -qE "$pattern"; then
             echo "PR title must follow Conventional Commits:" >&2
             echo "  type(scope)!: subject   e.g. 'feat(rust): add retry loop'" >&2
             echo "  types: feat fix docs style refactor perf test build ci chore revert" >&2
             exit 1
           fi
-          echo "title ok: $TITLE"
 
   size:
     name: size
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -91,12 +70,9 @@ jobs:
           ensure_label size/XL d93f0b
 
           # Changed lines excluding lockfiles and generated artifacts.
-          # Filtering lives in awk, not grep: grep exits 1 when every input
-          # line matches the exclusion pattern (a lockfile-only diff is a
-          # normal state), and under pipefail that kills the whole pipeline
-          # silently before any output.
           lines=$(git diff --numstat "$BASE_SHA" "$HEAD_SHA" \
-            | awk '$0 !~ /(Cargo\.lock|pnpm-lock\.yaml|mix\.lock|uv\.lock)$/ {sum+=$1+$2} END {print sum+0}')
+            | grep -vE '(Cargo\.lock|pnpm-lock\.yaml|mix\.lock|uv\.lock)$' \
+            | awk '{sum+=$1+$2} END {print sum+0}')
 
           if   [ "$lines" -lt 10 ]; then label=size/S
           elif [ "$lines" -lt 100 ]; then label=size/M
@@ -125,7 +101,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
