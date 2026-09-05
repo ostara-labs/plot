@@ -1,0 +1,14 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "home.title": "Trouvez le meilleur logement en France",
+  "home.subtitle": "Comparez terrains, maisons et appartements grâce à un scoring intelligent.",
+  "home.map_placeholder": "Carte interactive (placeholder)",
+  "project.new_button": "+ Nouveau projet",
+  "project.list_title": "Mes projets",
+  "project.list_empty": "Aucun projet pour le moment. Créez votre premier projet de recherche.",
+  "nav.home": "Accueil",
+  "language.switch": "Changer de langue",
+  "language.fr": "Français",
+  "language.en": "Anglais",
+  "status.scaffold": "Socle technique — aucun parcours fonctionnel n'est encore disponible."
+}

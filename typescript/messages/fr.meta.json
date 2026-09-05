@@ -1,0 +1,68 @@
+{
+  "home.title": {
+    "context": "Titre principal de la page d'accueil (hero)",
+    "usage": "Grand titre en haut de la page d'accueil",
+    "example": "Trouvez le meilleur logement en France",
+    "notes": "Doit rester court et percutant. 'Logement' couvre terrain, maison et appartement."
+  },
+  "home.subtitle": {
+    "context": "Sous-titre du hero de la page d'accueil",
+    "usage": "Sous le titre principal, décrit la valeur du produit",
+    "example": "Comparez terrains, maisons et appartements grâce à un scoring intelligent.",
+    "notes": "Mentionne le scoring, différenciateur clé du produit."
+  },
+  "home.map_placeholder": {
+    "context": "Label affiché sur la carte placeholder de la page d'accueil",
+    "usage": "Superposé à la carte MapLibre en attendant les données réelles",
+    "example": "Carte interactive (placeholder)",
+    "notes": "Indique que la carte n'affiche pas encore de données réelles (décision 27.18)."
+  },
+  "project.new_button": {
+    "context": "Bouton principal pour créer un nouveau projet de recherche",
+    "usage": "Bouton sur la page d'accueil, toujours visible",
+    "example": "L'utilisateur clique pour lancer le wizard de création",
+    "notes": "Verbe d'action, doit être court et clair."
+  },
+  "project.list_title": {
+    "context": "Titre de la section listant les projets de recherche de l'utilisateur",
+    "usage": "En-tête de la liste des projets sur la page d'accueil",
+    "example": "Mes projets",
+    "notes": "Possessif : la liste ne montre que les projets de l'utilisateur connecté."
+  },
+  "project.list_empty": {
+    "context": "Message affiché quand l'utilisateur n'a aucun projet",
+    "usage": "État vide de la liste des projets",
+    "example": "Aucun projet pour le moment. Créez votre premier projet de recherche.",
+    "notes": "Doit encourager l'action de création."
+  },
+  "nav.home": {
+    "context": "Libellé du lien de navigation vers la page d'accueil",
+    "usage": "Navigation principale du site",
+    "example": "Accueil",
+    "notes": "Court, un seul mot."
+  },
+  "language.switch": {
+    "context": "Label accessible du sélecteur de langue",
+    "usage": "Attribut aria-label du sélecteur FR/EN",
+    "example": "Changer de langue",
+    "notes": "Accessibilité : doit décrire l'action du contrôle."
+  },
+  "language.fr": {
+    "context": "Nom de la langue française dans le sélecteur de langue",
+    "usage": "Libellé du lien vers la version française",
+    "example": "Français",
+    "notes": "Toujours dans la langue cible (endonyme)."
+  },
+  "language.en": {
+    "context": "Nom de la langue anglaise dans le sélecteur de langue",
+    "usage": "Libellé du lien vers la version anglaise",
+    "example": "Anglais",
+    "notes": "Toujours dans la langue cible (endonyme)."
+  },
+  "status.scaffold": {
+    "context": "Bandeau indiquant que l'application est un socle technique sans parcours fonctionnel",
+    "usage": "Bandeau discret en bas de page",
+    "example": "Socle technique — aucun parcours fonctionnel n'est encore disponible.",
+    "notes": "Décision 27.18 : les parcours utilisateur ne sont implémentés qu'après validation UX."
+  }
+}
