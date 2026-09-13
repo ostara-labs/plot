@@ -28,14 +28,14 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, UUID]):
     async def on_after_forgot_password(
         self, user: User, token: str, request: Request | None = None
     ) -> None:
-        self._dev_mail_sink("password reset", user, token)
+        self._development_mail_sink("password reset", user, token)
 
     async def on_after_request_verify(
         self, user: User, token: str, request: Request | None = None
     ) -> None:
-        self._dev_mail_sink("email verification", user, token)
+        self._development_mail_sink("email verification", user, token)
 
-    def _dev_mail_sink(self, action: str, user: User, token: str) -> None:
+    def _development_mail_sink(self, action: str, user: User, token: str) -> None:
         """Log the token while no mail provider is configured (dev sink).
 
         Postmark delivery arrives in wave-07; once ``PLOT_POSTMARK_API_KEY``

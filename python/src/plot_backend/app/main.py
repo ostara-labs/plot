@@ -11,7 +11,7 @@ from plot_backend.app.auth.router import (
     get_users_router,
     get_verify_router,
 )
-from plot_backend.app.config import DEV_SECRET_KEY, get_settings
+from plot_backend.app.config import DEVELOPMENT_SECRET_KEY, get_settings
 from plot_backend.app.db.session import engine
 
 
@@ -22,9 +22,10 @@ def create_app() -> FastAPI:
     the source-controlled development signing secret (fail-fast, ZDD).
     """
     settings = get_settings()
-    if not settings.debug and settings.secret_key == DEV_SECRET_KEY:
+    if not settings.is_debug_enabled and settings.secret_key == DEVELOPMENT_SECRET_KEY:
         raise RuntimeError(
-            "PLOT_SECRET_KEY must be set to a deployment-specific secret when PLOT_DEBUG is false"
+            "PLOT_SECRET_KEY must be set to a deployment-specific secret when "
+            "PLOT_IS_DEBUG_ENABLED is false"
         )
     app = FastAPI(title="Plot API", version=__version__)
 
