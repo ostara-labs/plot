@@ -20,6 +20,7 @@ import os
 import socket
 import subprocess
 from pathlib import Path
+from urllib.parse import urlparse
 
 import httpx
 import pytest
@@ -45,6 +46,14 @@ def _postgres_reachable() -> bool:
     with socket.socket() as sock:
         sock.settimeout(2)
         return sock.connect_ex(("127.0.0.1", 5432)) == 0
+
+
+def _redis_reachable() -> bool:
+    """True when the configured test Redis accepts TCP connections."""
+    parsed = urlparse(TEST_REDIS_URL)
+    with socket.socket() as sock:
+        sock.settimeout(2)
+        return sock.connect_ex((parsed.hostname or "127.0.0.1", parsed.port or 6379)) == 0
 
 
 @pytest.fixture(scope="session")
@@ -108,6 +117,16 @@ async def _dispose_engine() -> None:
 @pytest_asyncio.fixture
 async def redis_client() -> Redis:
     """Fresh Redis client on the test Redis database (isolated from dev data)."""
+    if not _redis_reachable():
+        if _IN_CI:
+            pytest.skip(
+                "CI run without a reachable Redis: the workflow must provide "
+                "one (devtools python-ci test-postgis job)"
+            )
+        pytest.skip(
+            "Redis unreachable — auth integration tests need the dev docker "
+            "stack (docker compose -f docker-compose.dev.yml up -d)"
+        )
     client = Redis.from_url(TEST_REDIS_URL, decode_responses=True)
     await client.flushdb()
     yield client
