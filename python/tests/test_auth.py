@@ -3,6 +3,7 @@
 from uuid import uuid4
 
 import httpx
+import pytest
 from fastapi_users.jwt import generate_jwt
 from fastapi_users.manager import VERIFY_USER_TOKEN_AUDIENCE
 from redis.asyncio import Redis
@@ -71,6 +72,32 @@ async def test_login_rate_limit_returns_429(client: httpx.AsyncClient) -> None:
     )
     assert sixth.status_code == 429
     assert sixth.json()["detail"] == "TOO_MANY_ATTEMPTS"
+
+
+async def test_rate_limit_window_slides(
+    redis_client: Redis, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """27.8: a second burst straddling a fixed-window boundary is still blocked.
+
+    With a fixed window, five attempts at ``t`` and five at ``t + window - 1s``
+    would each start a fresh budget. The sliding window keeps the first burst
+    in scope, so the second one is rejected.
+    """
+    from plot_backend.app.auth import rate_limit
+
+    clock = {"now": 1_000_000.0}
+    monkeypatch.setattr(rate_limit.time, "time", lambda: clock["now"])
+    key = "rl:login:window-test"
+
+    for _ in range(rate_limit.RATE_LIMIT_MAX_ATTEMPTS):
+        assert await rate_limit._attempt_allowed(redis_client, key) is True
+
+    clock["now"] += rate_limit.RATE_LIMIT_WINDOW_SECONDS - 1
+    for _ in range(rate_limit.RATE_LIMIT_MAX_ATTEMPTS):
+        assert await rate_limit._attempt_allowed(redis_client, key) is False
+
+    clock["now"] += 2  # past the window measured from the first burst
+    assert await rate_limit._attempt_allowed(redis_client, key) is False
 
 
 async def test_login_distinct_errors(client: httpx.AsyncClient) -> None:

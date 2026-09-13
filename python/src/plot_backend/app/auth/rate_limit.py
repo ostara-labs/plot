@@ -8,7 +8,9 @@ a Redis outage must never turn into a 500.
 
 import hashlib
 import logging
+import time
 from typing import Annotated
+from uuid import uuid4
 
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -44,16 +46,21 @@ def _ip_key(ip: str) -> str:
 
 
 async def _attempt_allowed(redis: Redis, key: str) -> bool:
-    """Atomic INCR + EXPIRE(NX); True while the counter is within the cap.
+    """Sliding-window counter: True while the last 15 min hold <= 5 attempts.
 
-    The pipeline makes the counter and its TTL one atomic operation: with a
-    separate ``expire`` a failure between the two would leave a key without
-    TTL that no later attempt re-expires — a permanent block.
+    Attempts are a sorted set scored by timestamp; the window prunes members
+    older than ``RATE_LIMIT_WINDOW_SECONDS``, so attempts straddling an
+    arbitrary boundary share one window (27.8). A fixed window resetting on a
+    timer would let a burst on either side count as two full windows. The
+    pipeline (MULTI/EXEC) keeps prune/add/expire atomic.
     """
+    now = time.time()
     async with redis.pipeline(transaction=True) as pipe:
-        pipe.incr(key)
-        pipe.expire(key, RATE_LIMIT_WINDOW_SECONDS, nx=True)
-        count, _ = await pipe.execute()
+        pipe.zremrangebyscore(key, 0, now - RATE_LIMIT_WINDOW_SECONDS)
+        pipe.zadd(key, {f"{now}:{uuid4().hex}": now})
+        pipe.expire(key, RATE_LIMIT_WINDOW_SECONDS)
+        pipe.zcard(key)
+        _, _, _, count = await pipe.execute()
     return int(count) <= RATE_LIMIT_MAX_ATTEMPTS
 
 
