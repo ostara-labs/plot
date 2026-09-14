@@ -29,6 +29,10 @@ jobs:
     permissions:
       contents: read
     uses: ostara-labs/devtools/.github/workflows/ci.yml@963c23b29239dfaee577cc391e2c77958a265092 # v1.12.0
+    with:
+      # Opt-in DB-backed job: spins up PostGIS + Redis so the python
+      # integration tests run instead of skipping. Empty = job skipped.
+      postgis-image: postgis/postgis:17-3.5
 
   ai-review:
     name: ai-review
