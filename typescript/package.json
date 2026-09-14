@@ -19,7 +19,7 @@
     "check:i18n": "node scripts/check-i18n.ts"
   },
   "dependencies": {
-    "@inlang/paraglide-js": "^2.25.0",
+    "@inlang/paraglide-js": "^2.25.2",
     "@skeletonlabs/skeleton": "^5.0.1",
     "@skeletonlabs/skeleton-svelte": "^5.0.1",
     "@sveltejs/adapter-node": "^5.5.7",
@@ -30,13 +30,13 @@
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.11",
+    "@biomejs/biome": "^2.5.13",
     "typescript": "^5.9.0",
     "vitest": "^5.0.0",
-    "@types/node": "^26.4.0",
+    "@types/node": "^26.5.1",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
     "svelte-check": "^4.7.6",
-    "vite": "^8.2.2"
+    "vite": "^8.3.0"
   },
   "version": "0.3.0"
 }
