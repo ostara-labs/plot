@@ -5,15 +5,17 @@ app engine (created lazily on first use) targets it. The session-scoped
 ``migrated_test_db`` fixture creates the database and applies Alembic
 migrations once per run.
 
-Two runtime shapes:
+Two runtime shapes, told apart by the service-contract env vars:
 
 - **Local** — the dev docker stack (docker-compose.dev.yml). Tests run
-  against ``plot_test`` and Redis DB 15; they are skipped when PostgreSQL
-  is unreachable, so a bare `pytest` still passes.
-- **CI** — the devtools ``test-postgis`` job exports ``CI_DATABASE_URL``
-  and ``CI_REDIS_URL`` pointing at its service containers; those win when
-  present, and a CI run without a reachable database is a hard failure —
-  silent skips would erase the integration suite exactly where it matters.
+  against ``plot_test`` and Redis DB 15; when a service is unreachable they
+  are skipped, so a bare `pytest` still passes.
+- **Service job** — the devtools ``test-postgis`` job exports
+  ``CI_DATABASE_URL`` and ``CI_REDIS_URL`` for its service containers. Their
+  *presence* makes the service a hard requirement: an unreachable database
+  fails the run instead of skipping, since a silent skip would erase the
+  integration suite exactly where it matters. (The plain CI job sets ``CI``
+  but not those vars, so its integration tests still skip.)
 """
 
 import os
@@ -32,7 +34,10 @@ TEST_DATABASE_URL = os.environ.get(
     "CI_DATABASE_URL", f"postgresql+asyncpg://plot:plot@localhost:5432/{TEST_DB_NAME}"
 )
 TEST_REDIS_URL = os.environ.get("CI_REDIS_URL", "redis://localhost:6379/15")
-_IN_CI = os.environ.get("CI") == "true"
+# The devtools test-postgis job exports these for its service containers.
+# Their presence means the service must be reachable — no silent skip.
+_REQUIRE_POSTGRES = "CI_DATABASE_URL" in os.environ
+_REQUIRE_REDIS = "CI_REDIS_URL" in os.environ
 
 # Point the app at the test database before any app import.
 os.environ["PLOT_DATABASE_URL"] = TEST_DATABASE_URL
@@ -60,18 +65,17 @@ def _redis_reachable() -> bool:
 def migrated_test_db() -> str:
     """Create the test database and apply Alembic migrations (once per session)."""
     if not _postgres_reachable():
-        if _IN_CI:
-            pytest.skip(
-                "CI run without a reachable PostgreSQL: the workflow must "
-                "provide one (devtools python-ci test-postgis job, "
-                "postgis-image input)"
+        if _REQUIRE_POSTGRES:
+            pytest.fail(
+                "CI_DATABASE_URL is set but PostgreSQL is unreachable: the "
+                "test-postgis job must provide the service container"
             )
         pytest.skip(
             "PostgreSQL unreachable on localhost:5432 — auth integration "
             "tests need the dev docker stack (docker compose -f "
             "docker-compose.dev.yml up -d)"
         )
-    if not _IN_CI:
+    if not _REQUIRE_POSTGRES:
         # Local convenience only: in CI the service database already exists.
         subprocess.run(
             [
@@ -96,6 +100,8 @@ def migrated_test_db() -> str:
             capture_output=True,
         )
     except subprocess.CalledProcessError as exc:
+        if _REQUIRE_POSTGRES:
+            pytest.fail(f"alembic upgrade head failed on the test database: {exc.stderr}")
         pytest.skip(f"alembic upgrade head failed on plot_test: {exc.stderr}")
     return TEST_DATABASE_URL
 
@@ -118,10 +124,10 @@ async def _dispose_engine() -> None:
 async def redis_client() -> Redis:
     """Fresh Redis client on the test Redis database (isolated from dev data)."""
     if not _redis_reachable():
-        if _IN_CI:
-            pytest.skip(
-                "CI run without a reachable Redis: the workflow must provide "
-                "one (devtools python-ci test-postgis job)"
+        if _REQUIRE_REDIS:
+            pytest.fail(
+                "CI_REDIS_URL is set but Redis is unreachable: the "
+                "test-postgis job must provide the service container"
             )
         pytest.skip(
             "Redis unreachable — auth integration tests need the dev docker "
