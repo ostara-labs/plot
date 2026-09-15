@@ -1,6 +1,6 @@
 [project]
 name = "plot-backend"
-version = "0.2.0"
+version = "0.3.0"
 description = "Plot backend - geospatial search and scoring for the Plot platform."
 requires-python = ">=3.12"
 dependencies = [
