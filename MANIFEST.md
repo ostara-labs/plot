@@ -42,7 +42,7 @@ updating its row here in the same PR.
 | .github/pull_request_template.md | PR template |
 | .github/ISSUE_TEMPLATE/ | Issue templates |
 | .github/workflows/pr-pipeline.yml | Single PR pipeline: devtools CI gate + AI review + merge gate; passes the PostGIS service image to the CI workflow |
-| .devtools/ (submodule) | Shared makefiles, workflows, hooks — ostara-labs/devtools @ v1.10.0 |
+| .devtools/ (submodule) | Shared makefiles, workflows, hooks — ostara-labs/devtools @ v1.12.1 |
 | .github/workflows/security.yml | gitleaks + scorecard scan |
 | .github/workflows/release.yml | release-please |
 | .github/workflows/pr-classify.yml | Trust-boundary PR labeling |
